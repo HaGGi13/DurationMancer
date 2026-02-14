@@ -1,3 +1,4 @@
 <Solution>
-  <Project Path="src/DurationMancer.csproj" />
+  <Project Path="src/DurationMancer/DurationMancer.csproj" />
+  <Project Path="tests/DurationMancer.Tests/DurationMancer.Tests.csproj" />
 </Solution>
