@@ -97,9 +97,7 @@ jobs:
         --logger trx
         --results-directory "./TestResults/"
         --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true"
-        /p:CollectCoverage=true
-        /p:CoverletOutputFormat=opencover
-        /p:CoverletOutput="./../../TestResults/"
+        --collect:"XPlat Code Coverage"
 
     - name: Upload dotnet test results
       uses: actions/upload-artifact@v4
