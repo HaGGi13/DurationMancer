@@ -98,7 +98,7 @@ jobs:
         --results-directory "./TestResults/"
         --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true"
         /p:CollectCoverage=true
-        /p:CoverletOutputFormat=\"json,cobertura\"
+        /p:CoverletOutputFormat="json,cobertura"
         /p:CoverletOutput="./../../TestResults/"
         /p:MergeWith=./TestResults/coverage.json
 
