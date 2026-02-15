@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 namespace DurationMancer;
 
 /// <summary>
-/// Provides methods for parsing various duration string formats into a <see cref="TimeSpan"/>.
+/// Provides methods for parsing various duration string formats into a <see cref="TimeSpan" />.
 /// </summary>
 public static partial class DurationTimeParser
 {
@@ -17,12 +17,12 @@ public static partial class DurationTimeParser
     private const string StandardDurationTimeFormat =
         @"^(?:(?<d>\d+)\.)?(?<hh>[01]\d|2[0-3]):(?<mm>[0-5]\d):(?<ss>[0-5]\d)(?:\.(?<ms>\d{0,3}))?$";
 
-    private const string TimePattern = StandardDurationTimeFormat + @"|" +
-                                       @"^(?:" + DaysPattern + @")?\s*" +
-                                       @"(?:" + HoursPattern + @")?\s*" +
-                                       @"(?:" + MinutesPattern + @")?\s*" +
-                                       @"(?:" + SecondsPattern + @")?\s*" +
-                                       @"(?:" + MillisecondsPattern + @")?$";
+    private const string TimePattern = $"{StandardDurationTimeFormat}|" +
+                                       @$"^(?:{DaysPattern})?\s*" +
+                                       @$"(?:{HoursPattern})?\s*" +
+                                       @$"(?:{MinutesPattern})?\s*" +
+                                       @$"(?:{SecondsPattern})?\s*" +
+                                       $"(?:{MillisecondsPattern})?$";
 
     private static readonly Regex TimeRegex = CreateTimeFormatRegex();
 
