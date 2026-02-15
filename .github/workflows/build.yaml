@@ -122,7 +122,7 @@ jobs:
         --no-build
         -c ${{ env.buildConfiguration }}
         -o ./nupkg
-        /p:PackageVersion=${{ env.GitVersion_NuGetVersionV2 }}
+        /p:PackageVersion=${{ env.GitVersion_FullSemVer }}
 
     - name: Upload NuGet package artifact
       uses: actions/upload-artifact@v6
