@@ -99,7 +99,7 @@ jobs:
         --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true"
         /p:CollectCoverage=true
         /p:CoverletOutputFormat=opencover
-        /p:CoverletOutput="./../../TestResults"
+        /p:CoverletOutput="./../../TestResults/coverage"
 
     - name: Upload dotnet test results
       uses: actions/upload-artifact@v4
