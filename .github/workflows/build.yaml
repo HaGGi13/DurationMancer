@@ -17,6 +17,7 @@ env:
   DOTNET_NOLOGO: 1 # Prevents the dotnet CLI logo from displaying that speeds up build times
   solutionPath: './DurationMancer.slnx'
   buildConfiguration: 'Release'
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
 jobs:
   build:
@@ -64,7 +65,7 @@ jobs:
         dotnet-sonarscanner begin /k:"HaGGi13_DurationMancer" /o:"haggi13"
         /d:sonar.host.url="https://sonarcloud.io"
         /v:"${{ env.GitVersion_FullSemVer }}"
-        /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+        /d:sonar.token="$SONAR_TOKEN"
         /d:sonar.cs.opencover.reportsPaths=./TestResults/coverage*.opencover.xml
 
     # --- Build ---
@@ -95,7 +96,7 @@ jobs:
 
     # --- SonarCloud end ---
     - name: Run SonarQube analyze
-      run: dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+      run: dotnet-sonarscanner end /d:sonar.token="$SONAR_TOKEN"
 
     # --- NuGet Pack + Upload ---
     - name: Pack NuGet package
