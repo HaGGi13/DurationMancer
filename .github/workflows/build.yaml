@@ -81,7 +81,7 @@ jobs:
         /d:sonar.host.url="https://sonarcloud.io"
         /v:"${{ env.GitVersion_FullSemVer }}"
         /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
-        /d:sonar.cs.opencover.reportsPaths=./TestResults/coverage.opencover.xml
+        /d:sonar.cs.opencover.reportsPaths=./TestResults/coverage*.opencover.xml
 
     # --- Build ---
     - name: Build ${{ env.solutionPath }} ${{ env.GitVersion_FullSemVer }}
@@ -99,12 +99,12 @@ jobs:
         --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true"
         /p:CollectCoverage=true
         /p:CoverletOutputFormat=opencover
-        /p:CoverletOutput="./../../TestResults/"
+        /p:CoverletOutput="./../../TestResults/coverage"
 
     - name: Upload dotnet test results
       uses: actions/upload-artifact@v4
       with:
-        name: TestResults
+        name: TestResults.zip
         path: ./TestResults/
       # Use always() to always run this step to publish test results when there are test failures
       if: ${{ always() }}
@@ -115,7 +115,7 @@ jobs:
       run: |
         .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
 
-    # --- NuGet Pack, Upload & Publish ---
+    # --- NuGet Pack + Upload ---
     - name: Pack NuGet package
       run: >
         dotnet pack ${{ env.solutionPath }}
@@ -127,6 +127,6 @@ jobs:
     - name: Upload NuGet package artifact
       uses: actions/upload-artifact@v6
       with:
-        name: NuGetPackage
+        name: NuGetPackage.zip
         path: ./nupkg/*.nupkg
         retention-days: 3
