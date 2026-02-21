@@ -67,8 +67,8 @@ jobs:
         /v:"${{ env.GitVersion_FullSemVer }}"
         /d:sonar.token="$SONAR_TOKEN"
         /d:sonar.cs.opencover.reportsPaths=./TestResults/coverage*.opencover.xml
-        /d:sonar.exclusions="DurationMancer.Benchmarks/**"
-        /d:sonar.coverage.exclusions="DurationMancer.Benchmarks/**"
+        /d:sonar.exclusions="benchmarks/**"
+        /d:sonar.coverage.exclusions="benchmarks/**"
 
     # --- Build ---
     - name: Build ${{ env.GitVersion_FullSemVer }}
