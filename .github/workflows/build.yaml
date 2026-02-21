@@ -13,13 +13,16 @@ permissions:
   pull-requests: write
 
 env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1 # Opt out of telemetry to speed up the build
+  DOTNET_NOLOGO: 1 # Prevents the dotnet CLI logo from displaying that speeds up build times
   solutionPath: './DurationMancer.slnx'
   buildConfiguration: 'Release'
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
 jobs:
   build:
     name: Build and analyze
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
     - name: Code checkout
       uses: actions/checkout@v4
@@ -48,43 +51,25 @@ jobs:
         java-version: 17
         distribution: 'zulu'
 
-    # --- SonarCloud caching & installation ---
-    - name: Cache SonarQube Cloud packages
-      uses: actions/cache@v4
-      with:
-        path: ~\sonar\cache
-        key: ${{ runner.os }}-sonar
-        restore-keys: ${{ runner.os }}-sonar
-    - name: Cache SonarQube Cloud scanner
-      id: cache-sonar-scanner
-      uses: actions/cache@v4
-      with:
-        path: .\.sonar\scanner
-        key: ${{ runner.os }}-sonar-scanner
-        restore-keys: ${{ runner.os }}-sonar-scanner
+    # --- SonarCloud installation ---
     - name: Install SonarQube Cloud scanner
-      if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
-      shell: powershell
-      run: |
-        New-Item -Path .\.sonar\scanner -ItemType Directory
-        dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
+      run: dotnet tool install dotnet-sonarscanner --global
 
     # --- Restore ---
-    - name: Restore ${{ env.solutionPath }} dependencies
+    - name: Restore dependencies
       run: dotnet restore ${{ env.solutionPath }}
 
     # --- SonarCloud begin ---
     - name: Prepare SonarQube analyze
-      shell: powershell
       run: >
-        .\.sonar\scanner\dotnet-sonarscanner begin /k:"HaGGi13_DurationMancer" /o:"haggi13"
+        dotnet-sonarscanner begin /k:"HaGGi13_DurationMancer" /o:"haggi13"
         /d:sonar.host.url="https://sonarcloud.io"
         /v:"${{ env.GitVersion_FullSemVer }}"
-        /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+        /d:sonar.token="$SONAR_TOKEN"
         /d:sonar.cs.opencover.reportsPaths=./TestResults/coverage*.opencover.xml
 
     # --- Build ---
-    - name: Build ${{ env.solutionPath }} ${{ env.GitVersion_FullSemVer }}
+    - name: Build ${{ env.GitVersion_FullSemVer }}
       run: >
         dotnet build ${{ env.solutionPath }}
         --no-restore
@@ -98,22 +83,20 @@ jobs:
         --results-directory "./TestResults/"
         --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true"
         /p:CollectCoverage=true
-        /p:CoverletOutputFormat=opencover
+        /p:CoverletOutputFormat="opencover"
         /p:CoverletOutput="./../../TestResults/coverage"
 
     - name: Upload dotnet test results
       uses: actions/upload-artifact@v4
       with:
-        name: TestResults.zip
+        name: TestResults
         path: ./TestResults/
       # Use always() to always run this step to publish test results when there are test failures
       if: ${{ always() }}
 
     # --- SonarCloud end ---
     - name: Run SonarQube analyze
-      shell: powershell
-      run: |
-        .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+      run: dotnet-sonarscanner end /d:sonar.token="$SONAR_TOKEN"
 
     # --- NuGet Pack + Upload ---
     - name: Pack NuGet package
@@ -125,8 +108,8 @@ jobs:
         /p:PackageVersion=${{ env.GitVersion_FullSemVer }}
 
     - name: Upload NuGet package artifact
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v4
       with:
-        name: NuGetPackage.zip
+        name: NuGetPackage
         path: ./nupkg/*.nupkg
         retention-days: 3
