@@ -115,7 +115,7 @@ jobs:
       run: |
         .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
 
-    # --- NuGet Pack, Upload & Publish ---
+    # --- NuGet Pack + Upload ---
     - name: Pack NuGet package
       run: >
         dotnet pack ${{ env.solutionPath }}
