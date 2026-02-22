@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="benchmarks/DurationMancer.Benchmarks/DurationMancer.Benchmarks.csproj" />
   <Project Path="src/DurationMancer/DurationMancer.csproj" />
   <Project Path="tests/DurationMancer.Tests/DurationMancer.Tests.csproj" />
 </Solution>
