@@ -14,9 +14,8 @@ public class Configuration : ManualConfig
         AddJob(Job.Default.WithRuntime(CoreRuntime.Core90).WithId(".NET 9"));
         AddJob(Job.Default.WithRuntime(CoreRuntime.Core10_0).WithId(".NET 10"));
 
-        AddExporter(MarkdownExporter.GitHub);
-        AddExporter(HtmlExporter.Default);
-
         AddColumn(StatisticColumn.P95);
+
+        HideColumns("Job", "Alloc Ratio");
     }
 }

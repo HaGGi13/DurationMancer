@@ -78,6 +78,23 @@ public static partial class DurationTimeParser
     }
 
     /// <summary>
+    /// Parses a given input string into a <see cref="TimeSpan" /> representation.
+    /// Throws a <see cref="FormatException" /> if the input string is not in a valid duration format.
+    /// </summary>
+    /// <param name="input">The input string that represents a duration in a valid format.</param>
+    /// <returns>A <see cref="TimeSpan" /> that represents the parsed duration.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when the input string is <c>null</c>.</exception>
+    /// <exception cref="FormatException">Thrown when the input string is not in a valid format or cannot be parsed.</exception>
+    public static TimeSpan Parse(string? input)
+    {
+        ArgumentNullException.ThrowIfNull(input);
+
+        return TryParse(input, out var result)
+            ? result
+            : throw new FormatException($"Input string '{input}' was not in a correct duration format.");
+    }
+
+    /// <summary>
     /// Tries to parse a possibly matched time in duration format [d.]HH:mm:ss[.fff].
     /// </summary>
     /// <param name="match">Possibly RegEx match that contains values to process.</param>
