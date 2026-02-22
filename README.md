@@ -1,3 +1,6 @@
+[![Build and analyze][1]][10]
+[![Quality Gate Status][2]][11]
+
 # DurationMancer
 
 DurationMancer is a simple library that provides a flexible time parser that understands both technical and natural language inputs. You can use these formats wherever a time duration is required, and you don't want to deal with the hassle of parsing strings yourself.
@@ -91,3 +94,13 @@ TimeSpan result2 = DurationTimeParser.Parse(input2);
 ## Benchmarks
 
 For detailed benchmark results, please check the [Benchmarks page](https://github.com/HaGGi13/DurationMancer/wiki/Benchmarks) in the Wiki.
+
+<!--# badge image references -->
+
+[1]: https://github.com/HaGGi13/DurationMancer/actions/workflows/build.yaml/badge.svg
+[2]: https://sonarcloud.io/api/project_badges/measure?project=HaGGi13_DurationMancer&metric=alert_status
+
+<!--# badge link references -->
+
+[10]: https://github.com/HaGGi13/DurationMancer/actions/workflows/build.yaml "Build pipeline"
+[11]: https://sonarcloud.io/summary/new_code?id=HaGGi13_DurationMancer "Latest new code analysis"
