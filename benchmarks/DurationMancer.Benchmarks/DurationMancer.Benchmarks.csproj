@@ -4,8 +4,11 @@
         <OutputType>Exe</OutputType>
         <IsPackable>false</IsPackable>
         <IsPublishable>false</IsPublishable>
-        <AssemblyAttribute>System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage</AssemblyAttribute>
     </PropertyGroup>
+
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute" />
+    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="BenchmarkDotNet" />
