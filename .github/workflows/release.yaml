@@ -85,19 +85,10 @@ jobs:
       - name: Validate NuGet package
         run: dotnet nuget verify ./nupkg/*.nupkg --all || true # 'verify' checks signatures; use 'true' fallback if unsigned
 
-      # --- Trusted Publishing: OIDC login
-      - name: NuGet login (OIDC → temp API key)
-        env:
-          NUGET_USER: ${{ secrets.NUGET_USER }}
-        uses: NuGet/login@v1
-        id: nuget_login
-        with:
-          user: $NUGET_USER
-
       # --- Push to nuget.org ---
       - name: Push to NuGet.org
         env:
-          NUGET_API_KEY: ${{ steps.nuget_login.outputs.NUGET_API_KEY }}
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
         run: >
           dotnet nuget push ./nupkg/*.nupkg
           --api-key $NUGET_API_KEY
