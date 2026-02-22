@@ -1,38 +1,8 @@
 # DurationMancer
 
-DurationMancer is a simle library that provides a flexible time parser that understands both technical and natural language inputs. You can use these formats wherever a time duration is required and you don't want to deal with the hassle of parsing strings yourself.
+DurationMancer is a simple library that provides a flexible time parser that understands both technical and natural language inputs. You can use these formats wherever a time duration is required, and you don't want to deal with the hassle of parsing strings yourself.
 
 ℹ️ Negative values are not supported (yet)!
-
-## Usage
-
-The usage very simple, like shown in the examples below.
-
-### Humand-readable Format
-```csharp
-// Example 1: Mix of full words and shorthand
-string input1 = "2days 4h 15m 30s";
-TimeSpan result1 = DurationParser.Parse(input1);
-// result1 == TimeSpan.FromDays(2) + TimeSpan.FromHours(4) + TimeSpan.FromMinutes(15) + TimeSpan.FromSeconds(30)
-
-// Example 2: Decimal values with flexible spacing
-string input2 = "1.5 hours 100ms";
-TimeSpan result2 = DurationParser.Parse(input2);
-// result2 == TimeSpan.FromHours(1.5) + TimeSpan.FromMilliseconds(100)
-```
-
-### Standard Duration Format
-```csharp
-// Example 1: Days, hours, minutes, and seconds
-string input1 = "1.05:00:00";
-TimeSpan result1 = DurationParser.Parse(input1);
-// result1 == new TimeSpan(days: 1, hours: 5, minutes: 0, seconds: 0)
-
-// Example 2: Seconds with milliseconds
-string input2 = "00:00:45.500";
-TimeSpan result2 = DurationParser.Parse(input2);
-// result2 == TimeSpan.FromSeconds(45.5)
-```
 
 ## Supported Formats
 
@@ -41,7 +11,7 @@ TimeSpan result2 = DurationParser.Parse(input2);
 This format is best for precise, structured input. It follows the pattern: `[days.]HH:mm:ss[.milliseconds]`
 
 | Component        | Format | Range / Description                               |
-| :--------------- | :----- | :------------------------------------------------ |
+|:-----------------|:-------|:--------------------------------------------------|
 | **Days**         | `d.`   | Optional. Any number of digits followed by a dot. |
 | **Hours**        | `HH`   | **Required.** 00 to 23.                           |
 | **Minutes**      | `mm`   | **Required.** 00 to 59.                           |
@@ -61,7 +31,7 @@ This format is ideal for quick CLI input. You can mix and match units using full
 #### Supported Units
 
 | Unit             | Keywords (Case-Insensitive)         |
-| :--------------- | :---------------------------------- |
+|:-----------------|:------------------------------------|
 | **Days**         | `d`, `day`, `days`                  |
 | **Hours**        | `h`, `hour`, `hours`                |
 | **Minutes**      | `m`, `min`, `minute`, `minutes`     |
@@ -76,11 +46,45 @@ This format is ideal for quick CLI input. You can mix and match units using full
 
 **Examples:**
 
-- `1d 12h`
-- `5m 30s`
-- `1.5 hours`
-- `100ms`
-- `2days 4h 15m 30s`
+- 1d 12h → `1.12:00:00`
+- 5m 30s → `00:05:30`
+- 1.5 hours → `01:30:00`
+- 100 ms → `00:00:00.100`
+- 2 days 4 h 15 m 30 s → `2.04:15:30`
+
+## Usage
+
+The usage is straightforward, like shown in the examples below.
+
+### Standard Duration Format
+```csharp
+// Example 1: Days, hours, minutes, and seconds
+string input1 = "1.05:00:00";
+TimeSpan result1 = DurationTimeParser.TryParse(input1);
+// result1 == new TimeSpan(days: 1, hours: 5, minutes: 0, seconds: 0)
+// result1 -> 1.05:00:00
+
+// Example 2: Seconds with milliseconds
+string input2 = "00:00:45.500";
+TimeSpan result2 = DurationTimeParser.TryParse(input2);
+// result2 == TimeSpan.FromSeconds(45) + TimeSpan.FromMilliseconds(500)
+// result2 -> 00:00:45.500
+```
+
+### Human-readable Format
+```csharp
+// Example 1: Mix of full words and shorthand
+string input1 = "2days 4h 15m 30s";
+TimeSpan result1 = DurationTimeParser.TryParse(input1);
+// result1 == TimeSpan.FromDays(2) + TimeSpan.FromHours(4) + TimeSpan.FromMinutes(15) + TimeSpan.FromSeconds(30)
+// result1 -> 2.04:15:30
+
+// Example 2: Decimal values with flexible spacing
+string input2 = "1.5 hours 100ms";
+TimeSpan result2 = DurationTimeParser.TryParse(input2);
+// result2 == TimeSpan.FromHours(1.5) + TimeSpan.FromMilliseconds(100)
+// result2 -> 01:30:00.100
+```
 
 ## Benchmarks
 
@@ -94,33 +98,33 @@ AMD Ryzen 9 7950X3D 4.20GHz, 1 CPU, 32 logical and 16 physical cores
   .NET 8  : .NET 8.0.24 (8.0.24, 8.0.2426.7010), X64 RyuJIT x86-64-v4
 ```
 
-| Method                         | Runtime   |        Mean |      Error |    StdDev |         P95 | Ratio | RatioSD | Rank |   Gen0 | Allocated |
-| ------------------------------ | --------- | ----------: | ---------: | --------: | ----------: | ----: | ------: | ---: | -----: | --------: |
-| 'Standard: HH:mm:ss'           | .NET 10.0 | 298.1505 ns |  2.4080 ns | 2.2524 ns | 301.3607 ns |  8.02 |    0.06 |    3 | 0.0348 |    1752 B |
-| 'Standard: d.HH:mm:ss.fff'     | .NET 10.0 | 337.5800 ns |  6.5587 ns | 6.1350 ns | 346.8909 ns |  9.08 |    0.16 |    4 | 0.0362 |    1840 B |
-| 'Human: single unit (5m)'      | .NET 10.0 | 392.8773 ns |  3.5938 ns | 3.3616 ns | 397.7572 ns | 10.56 |    0.09 |    5 | 0.0339 |    1712 B |
-| 'Human: two units (1h 30m)'    | .NET 10.0 | 452.5045 ns |  2.3685 ns | 1.9778 ns | 454.8526 ns | 12.17 |    0.06 |    6 | 0.0353 |    1776 B |
-| 'Human: full combo' \*         | .NET 10.0 | 759.7605 ns |  6.1496 ns | 5.7524 ns | 768.1694 ns | 20.43 |    0.16 |    8 | 0.0401 |    2024 B |
-| 'Human: decimals (1.5h 100ms)' | .NET 10.0 | 560.4385 ns |  2.5589 ns | 2.2684 ns | 563.9663 ns | 15.07 |    0.07 |    7 | 0.0372 |    1880 B |
-| 'Invalid input'                | .NET 10.0 |  37.1920 ns |  0.0890 ns | 0.0789 ns |  37.3029 ns |  1.00 |    0.00 |    2 |      - |         - |
-| 'Null input'                   | .NET 10.0 |   0.8341 ns |  0.0046 ns | 0.0038 ns |   0.8401 ns |  0.02 |    0.00 |    1 |      - |         - |
-|                                |           |             |            |           |             |       |         |      |        |           |
-| 'Standard: HH:mm:ss'           | .NET 9.0  | 354.0586 ns |  7.0855 ns | 8.1597 ns | 363.1163 ns |  6.11 |    0.14 |    3 | 0.0348 |    1752 B |
-| 'Standard: d.HH:mm:ss.fff'     | .NET 9.0  | 397.6152 ns |  6.9474 ns | 6.4986 ns | 406.1554 ns |  6.86 |    0.12 |    4 | 0.0362 |    1840 B |
-| 'Human: single unit (5m)'      | .NET 9.0  | 471.8717 ns |  9.2507 ns | 9.4998 ns | 485.1973 ns |  8.15 |    0.17 |    5 | 0.0339 |    1712 B |
-| 'Human: two units (1h 30m)'    | .NET 9.0  | 536.7581 ns | 10.7092 ns | 8.9427 ns | 546.0439 ns |  9.27 |    0.16 |    6 | 0.0353 |    1776 B |
-| 'Human: full combo' \*         | .NET 9.0  | 873.6216 ns |  8.8310 ns | 7.8284 ns | 886.2697 ns | 15.08 |    0.17 |    8 | 0.0401 |    2024 B |
-| 'Human: decimals (1.5h 100ms)' | .NET 9.0  | 690.4374 ns |  4.3499 ns | 3.8561 ns | 696.4002 ns | 11.92 |    0.10 |    7 | 0.0372 |    1880 B |
-| 'Invalid input'                | .NET 9.0  |  57.9295 ns |  0.2371 ns | 0.4027 ns |  58.8710 ns |  1.00 |    0.01 |    2 |      - |         - |
-| 'Null input'                   | .NET 9.0  |   0.8429 ns |  0.0099 ns | 0.0087 ns |   0.8568 ns |  0.01 |    0.00 |    1 |      - |         - |
-|                                |           |             |            |           |             |       |         |      |        |           |
-| 'Standard: HH:mm:ss'           | .NET 8.0  | 315.1999 ns |  2.1455 ns | 1.9019 ns | 318.1252 ns |  5.29 |    0.04 |    3 | 0.0348 |    1752 B |
-| 'Standard: d.HH:mm:ss.fff'     | .NET 8.0  | 368.5408 ns |  1.7708 ns | 1.4787 ns | 370.8185 ns |  6.18 |    0.03 |    4 | 0.0362 |    1840 B |
-| 'Human: single unit (5m)'      | .NET 8.0  | 440.2367 ns |  1.8504 ns | 1.6403 ns | 442.6820 ns |  7.38 |    0.04 |    5 | 0.0339 |    1712 B |
-| 'Human: two units (1h 30m)'    | .NET 8.0  | 492.3350 ns |  5.4852 ns | 5.1308 ns | 499.0772 ns |  8.26 |    0.09 |    6 | 0.0353 |    1776 B |
-| 'Human: full combo' \*         | .NET 8.0  | 853.8517 ns |  8.0323 ns | 7.5134 ns | 865.4025 ns | 14.32 |    0.13 |    8 | 0.0401 |    2024 B |
-| 'Human: decimals (1.5h 100ms)' | .NET 8.0  | 707.8297 ns |  5.2995 ns | 4.9572 ns | 715.4481 ns | 11.87 |    0.09 |    7 | 0.0372 |    1880 B |
-| 'Invalid input'                | .NET 8.0  |  59.6169 ns |  0.2654 ns | 0.2352 ns |  59.9797 ns |  1.00 |    0.01 |    2 |      - |         - |
-| 'Null input'                   | .NET 8.0  |   0.9443 ns |  0.0370 ns | 0.0803 ns |   1.0528 ns |  0.02 |    0.00 |    1 |      - |         - |
+| Method                         | Runtime   |        Mean |      Error |     StdDev |         P95 | Ratio | RatioSD | Rank |   Gen0 | Allocated |
+|--------------------------------|-----------|------------:|-----------:|-----------:|------------:|------:|--------:|-----:|-------:|----------:|
+| 'Standard: HH:mm:ss'           | .NET 10.0 | 300.9489 ns |  5.9727 ns | 11.2181 ns | 319.4432 ns |  6.79 |    0.26 |    3 | 0.0329 |    1656 B |
+| 'Standard: d.HH:mm:ss.fff'     | .NET 10.0 | 307.9156 ns |  3.4664 ns |  2.7063 ns | 310.8405 ns |  6.94 |    0.10 |    3 | 0.0334 |    1688 B |
+| 'Human: single unit (5m)'      | .NET 10.0 | 397.4792 ns |  2.1752 ns |  2.0347 ns | 400.2274 ns |  8.96 |    0.11 |    4 | 0.0334 |    1688 B |
+| 'Human: two units (1h 30m)'    | .NET 10.0 | 418.4242 ns |  4.4143 ns |  3.9132 ns | 425.3554 ns |  9.44 |    0.14 |    5 | 0.0339 |    1720 B |
+| 'Human: full combo' \*         | .NET 10.0 | 650.1754 ns |  4.3376 ns |  3.8452 ns | 656.4196 ns | 14.66 |    0.18 |    7 | 0.0372 |    1880 B |
+| 'Human: decimals (1.5h 100ms)' | .NET 10.0 | 533.1936 ns |  3.1562 ns |  2.9523 ns | 537.8815 ns | 12.02 |    0.15 |    6 | 0.0353 |    1816 B |
+| 'Invalid input'                | .NET 10.0 |  44.3513 ns |  0.5849 ns |  0.5185 ns |  45.2777 ns |  1.00 |    0.02 |    2 |      - |         - |
+| 'Null input'                   | .NET 10.0 |   0.9634 ns |  0.0264 ns |  0.0221 ns |   0.9963 ns |  0.02 |    0.00 |    1 |      - |         - |
+|                                |           |             |            |            |             |       |         |      |        |           |
+| 'Standard: HH:mm:ss'           | .NET 9.0  | 340.3667 ns |  4.1653 ns |  3.4782 ns | 344.6905 ns |  5.26 |    0.09 |    3 | 0.0329 |    1656 B |
+| 'Standard: d.HH:mm:ss.fff'     | .NET 9.0  | 363.9161 ns |  4.1630 ns |  3.6904 ns | 368.8706 ns |  5.62 |    0.09 |    4 | 0.0334 |    1688 B |
+| 'Human: single unit (5m)'      | .NET 9.0  | 478.1021 ns |  4.4622 ns |  3.9556 ns | 484.8228 ns |  7.39 |    0.12 |    5 | 0.0334 |    1688 B |
+| 'Human: two units (1h 30m)'    | .NET 9.0  | 512.0947 ns |  6.9916 ns |  6.1979 ns | 521.3898 ns |  7.91 |    0.14 |    6 | 0.0339 |    1720 B |
+| 'Human: full combo' \*         | .NET 9.0  | 848.9257 ns | 13.7756 ns | 12.2117 ns | 869.7854 ns | 13.12 |    0.26 |    8 | 0.0372 |    1880 B |
+| 'Human: decimals (1.5h 100ms)' | .NET 9.0  | 737.0302 ns |  8.3758 ns |  7.8347 ns | 748.2742 ns | 11.39 |    0.19 |    7 | 0.0353 |    1816 B |
+| 'Invalid input'                | .NET 9.0  |  64.7167 ns |  0.9763 ns |  0.9133 ns |  66.1356 ns |  1.00 |    0.02 |    2 |      - |         - |
+| 'Null input'                   | .NET 9.0  |   0.9930 ns |  0.0224 ns |  0.0210 ns |   1.0187 ns |  0.02 |    0.00 |    1 |      - |         - |
+|                                |           |             |            |            |             |       |         |      |        |           |
+| 'Standard: HH:mm:ss'           | .NET 8.0  | 353.3871 ns |  3.5373 ns |  2.7617 ns | 357.3055 ns |  5.52 |    0.09 |    3 | 0.0329 |    1656 B |
+| 'Standard: d.HH:mm:ss.fff'     | .NET 8.0  | 384.0297 ns |  6.0336 ns |  5.3486 ns | 391.8443 ns |  6.00 |    0.12 |    4 | 0.0334 |    1688 B |
+| 'Human: single unit (5m)'      | .NET 8.0  | 503.3029 ns |  9.9447 ns | 10.6408 ns | 518.5876 ns |  7.86 |    0.20 |    5 | 0.0334 |    1688 B |
+| 'Human: two units (1h 30m)'    | .NET 8.0  | 525.4900 ns |  4.2636 ns |  3.5603 ns | 529.8040 ns |  8.20 |    0.14 |    5 | 0.0339 |    1720 B |
+| 'Human: full combo' \*         | .NET 8.0  | 872.3254 ns |  9.7794 ns |  9.1477 ns | 886.8218 ns | 13.62 |    0.25 |    7 | 0.0372 |    1880 B |
+| 'Human: decimals (1.5h 100ms)' | .NET 8.0  | 772.2243 ns | 11.7644 ns | 11.0045 ns | 785.5411 ns | 12.06 |    0.25 |    6 | 0.0353 |    1816 B |
+| 'Invalid input'                | .NET 8.0  |  64.0676 ns |  1.0798 ns |  1.0101 ns |  65.4616 ns |  1.00 |    0.02 |    2 |      - |         - |
+| 'Null input'                   | .NET 8.0  |   0.9657 ns |  0.0224 ns |  0.0198 ns |   0.9943 ns |  0.02 |    0.00 |    1 |      - |         - |
 
 \* full combo = "2 days 4 hours 15 minutes 30 seconds 500 milliseconds"

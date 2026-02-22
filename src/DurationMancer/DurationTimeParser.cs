@@ -26,7 +26,7 @@ public static partial class DurationTimeParser
 
     private static readonly Regex TimeRegex = CreateTimeFormatRegex();
 
-    [GeneratedRegex(TimePattern, RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+    [GeneratedRegex(TimePattern, RegexOptions.IgnoreCase)]
     private static partial Regex CreateTimeFormatRegex();
 
     /// <summary>
@@ -87,18 +87,28 @@ public static partial class DurationTimeParser
     {
         result = TimeSpan.Zero;
 
-        if (!match.Groups["hh"].Success)
+        // Caching the group in a variable to avoid multiple string lookups by calling .Success and .Value
+        var hoursGroup = match.Groups["hh"];
+
+        // Check if the standard format was used, if so, hours must be given
+        if (!hoursGroup.Success)
         {
             return false;
         }
 
-        _ = int.TryParse(match.Groups["d"].Value, out var d);
-        _ = int.TryParse(match.Groups["hh"].Value, out var hh);
-        _ = int.TryParse(match.Groups["mm"].Value, out var mm);
-        _ = int.TryParse(match.Groups["ss"].Value, out var ss);
-        _ = int.TryParse(match.Groups["ms"].Value, out var ms);
+        var daysGroup = match.Groups["d"];
+        var minutesGroup = match.Groups["mm"];
+        var secondsGroup = match.Groups["ss"];
+        var millisecondsGroup = match.Groups["ms"];
 
-        result = new TimeSpan(d, hh, mm, ss, ms);
+        // Use .ValueSpan to avoid string allocations, for better performance
+        _ = int.TryParse(daysGroup.ValueSpan, out var days);
+        _ = int.TryParse(hoursGroup.ValueSpan, out var hours);
+        _ = int.TryParse(minutesGroup.ValueSpan, out var minutes);
+        _ = int.TryParse(secondsGroup.ValueSpan, out var seconds);
+        _ = int.TryParse(millisecondsGroup.ValueSpan, out var milliseconds);
+
+        result = new TimeSpan(days, hours, minutes, seconds, milliseconds);
 
         return true;
     }
@@ -115,24 +125,31 @@ public static partial class DurationTimeParser
 
         try
         {
-            var days = match.Groups["days"].Success
-                ? double.Parse(match.Groups["days"].Value, CultureInfo.InvariantCulture)
+            var daysGroup = match.Groups["days"];
+            var hoursGroup = match.Groups["hours"];
+            var minutesGroup = match.Groups["minutes"];
+            var secondsGroup = match.Groups["seconds"];
+            var millisecondsGroup = match.Groups["milliseconds"];
+
+            // Use .ValueSpan to avoid string allocations, for better performance
+            var days = daysGroup.Success
+                ? double.Parse(daysGroup.ValueSpan, CultureInfo.InvariantCulture)
                 : 0;
 
-            var hours = match.Groups["hours"].Success
-                ? double.Parse(match.Groups["hours"].Value, CultureInfo.InvariantCulture)
+            var hours = hoursGroup.Success
+                ? double.Parse(hoursGroup.ValueSpan, CultureInfo.InvariantCulture)
                 : 0;
 
-            var minutes = match.Groups["minutes"].Success
-                ? double.Parse(match.Groups["minutes"].Value, CultureInfo.InvariantCulture)
+            var minutes = minutesGroup.Success
+                ? double.Parse(minutesGroup.ValueSpan, CultureInfo.InvariantCulture)
                 : 0;
 
-            var seconds = match.Groups["seconds"].Success
-                ? double.Parse(match.Groups["seconds"].Value, CultureInfo.InvariantCulture)
+            var seconds = secondsGroup.Success
+                ? double.Parse(secondsGroup.ValueSpan, CultureInfo.InvariantCulture)
                 : 0;
 
-            var milliSeconds = match.Groups["milliseconds"].Success
-                ? int.Parse(match.Groups["milliseconds"].Value, CultureInfo.InvariantCulture)
+            var milliSeconds = millisecondsGroup.Success
+                ? int.Parse(millisecondsGroup.ValueSpan, CultureInfo.InvariantCulture)
                 : 0;
 
             var timeSpan = TimeSpan.FromDays(days) +
@@ -144,7 +161,7 @@ public static partial class DurationTimeParser
             // As we do not support nanoseconds or ticks, we have to round to the nearest millisecond
             result = RoundOnMilliseconds(timeSpan);
         }
-        catch (Exception)
+        catch (Exception e) when (e is FormatException or OverflowException)
         {
             return false;
         }
