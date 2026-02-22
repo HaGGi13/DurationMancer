@@ -2,10 +2,10 @@ name: Build and analyze
 
 on:
   push:
-    branches: [develop, master]
+    branches: [main, release/*, develop]
   pull_request:
     types: [opened, synchronize, reopened]
-    branches: [develop, master]
+    branches: [main, release/*, develop]
   workflow_dispatch:
 
 permissions:
