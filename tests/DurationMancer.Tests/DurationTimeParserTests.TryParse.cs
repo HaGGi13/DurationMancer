@@ -114,23 +114,9 @@ public static partial class DurationTimeParserTests
         #region Invalid input tests
 
         [Theory]
-        [MemberData(nameof(DurationTimeParserInvalidTestData.InvalidMixedFormatInputs),
+        [MemberData(nameof(DurationTimeParserInvalidTestData.AllInvalidInputs),
             MemberType = typeof(DurationTimeParserInvalidTestData))]
-        public void TryParse_MixedInputFormats_ReturnsFalseAndTimeSpanZero(string input)
-        {
-            // Arrange
-            // Act
-            var parsedResult = DurationTimeParser.TryParse(input, out var parsedValue);
-
-            // Assert
-            parsedValue.Should().Be(TimeSpan.Zero);
-            parsedResult.Should().BeFalse();
-        }
-
-        [Theory]
-        [MemberData(nameof(DurationTimeParserInvalidTestData.InvalidInputs),
-            MemberType = typeof(DurationTimeParserInvalidTestData))]
-        public void TryParse_InvalidInput_ReturnsFalseAndTimeSpanZero(string? input)
+        public void TryParse_InvalidInputs_ReturnsFalseAndTimeSpanZero(string input)
         {
             // Arrange
             // Act
@@ -263,6 +249,149 @@ public static partial class DurationTimeParserTests
             parsedResult.Should().BeTrue();
         }
 
+        [Theory]
+        [MemberData(nameof(DurationTimeParserRollingOverTestData.ValidRollingOverWithNonZeroHigherComponentInputs),
+            MemberType = typeof(DurationTimeParserRollingOverTestData))]
+        public void TryParse_RollingOverWithNonZeroHigherComponents_ReturnsTrueAndCorrectTimeSpan(string input, string result)
+        {
+            // Arrange
+            _ = TimeSpan.TryParse(result, out var expectedResult);
+
+            // Act
+            var parsedResult = DurationTimeParser.TryParse(input, out var parsedValue);
+
+            // Assert
+            parsedValue.Should().Be(expectedResult);
+            parsedResult.Should().BeTrue();
+        }
+
+        [Theory]
+        [MemberData(nameof(DurationTimeParserRollingOverTestData.ValidMultiLevelCascadingRollingOverInputs),
+            MemberType = typeof(DurationTimeParserRollingOverTestData))]
+        public void TryParse_MultiLevelCascadingRollingOver_ReturnsTrueAndCorrectTimeSpan(string input, string result)
+        {
+            // Arrange
+            _ = TimeSpan.TryParse(result, out var expectedResult);
+
+            // Act
+            var parsedResult = DurationTimeParser.TryParse(input, out var parsedValue);
+
+            // Assert
+            parsedValue.Should().Be(expectedResult);
+            parsedResult.Should().BeTrue();
+        }
+
+        #endregion
+
+        #region Negative rolling over tests
+
+        [Theory]
+        [MemberData(nameof(DurationTimeParserRollingOverTestData.ValidNegativeRollingOver1000MillisecondsInputs),
+            MemberType = typeof(DurationTimeParserRollingOverTestData))]
+        public void TryParse_NegativeRollingOverThousandMilliseconds_ReturnsTrueAndNegativeOneSecond(string input)
+        {
+            // Arrange
+            // Act
+            var parsedResult = DurationTimeParser.TryParse(input, out var parsedValue);
+
+            // Assert
+            parsedValue.Should().Be(new TimeSpan(0, 0, -1));
+            parsedResult.Should().BeTrue();
+        }
+
+        [Theory]
+        [MemberData(nameof(DurationTimeParserRollingOverTestData.ValidNegativeRollingOver60SecondsInputs),
+            MemberType = typeof(DurationTimeParserRollingOverTestData))]
+        public void TryParse_NegativeRollingOverSixtySeconds_ReturnsTrueAndNegativeOneMinute(string input)
+        {
+            // Arrange
+            // Act
+            var parsedResult = DurationTimeParser.TryParse(input, out var parsedValue);
+
+            // Assert
+            parsedValue.Should().Be(new TimeSpan(0, -1, 0));
+            parsedResult.Should().BeTrue();
+        }
+
+        [Theory]
+        [MemberData(nameof(DurationTimeParserRollingOverTestData.ValidNegativeRollingOver60MinutesInputs),
+            MemberType = typeof(DurationTimeParserRollingOverTestData))]
+        public void TryParse_NegativeRollingOverSixtyMinutes_ReturnsTrueAndNegativeOneHour(string input)
+        {
+            // Arrange
+            // Act
+            var parsedResult = DurationTimeParser.TryParse(input, out var parsedValue);
+
+            // Assert
+            parsedValue.Should().Be(new TimeSpan(-1, 0, 0));
+            parsedResult.Should().BeTrue();
+        }
+
+        [Theory]
+        [MemberData(nameof(DurationTimeParserRollingOverTestData.ValidNegativeRollingOver24HoursInputs),
+            MemberType = typeof(DurationTimeParserRollingOverTestData))]
+        public void TryParse_NegativeRollingOverTwentyFourHours_ReturnsTrueAndNegativeOneDay(string input)
+        {
+            // Arrange
+            // Act
+            var parsedResult = DurationTimeParser.TryParse(input, out var parsedValue);
+
+            // Assert
+            parsedValue.Should().Be(new TimeSpan(-1, 0, 0, 0));
+            parsedResult.Should().BeTrue();
+        }
+
+        [Theory]
+        [MemberData(nameof(DurationTimeParserRollingOverTestData.ValidNegativeRollingOver25HoursInputs),
+            MemberType = typeof(DurationTimeParserRollingOverTestData))]
+        public void TryParse_NegativeRollingOverTwentyFiveHours_ReturnsTrueAndNegativeOneDayAndOneHour(string input)
+        {
+            // Arrange
+            // Act
+            var parsedResult = DurationTimeParser.TryParse(input, out var parsedValue);
+
+            // Assert
+            parsedValue.Should().Be(new TimeSpan(-1, -1, 0, 0));
+            parsedResult.Should().BeTrue();
+        }
+
+        #endregion
+
+        #region Valid negative input tests
+
+        [Theory]
+        [MemberData(nameof(DurationTimeParserValidTestData.ValidNegativeStandardDurationFormatInputs),
+            MemberType = typeof(DurationTimeParserValidTestData))]
+        public void TryParse_NegativeStandardDurationFormat_ShouldParseCorrectly(string input, int days, int hours,
+            int minutes, int seconds, int milliseconds)
+        {
+            // Arrange
+            var expected = new TimeSpan(days, hours, minutes, seconds, milliseconds);
+
+            // Act
+            var parsedResult = DurationTimeParser.TryParse(input, out var parsedValue);
+
+            // Assert
+            parsedValue.Should().Be(expected);
+            parsedResult.Should().BeTrue();
+        }
+
+        [Theory]
+        [MemberData(nameof(DurationTimeParserValidTestData.ValidNegativeHumanReadableFormatInputs),
+            MemberType = typeof(DurationTimeParserValidTestData))]
+        public void TryParse_NegativeHumanReadableFormat_ShouldParseCorrectly(string input, string result)
+        {
+            // Arrange
+            _ = TimeSpan.TryParse(result, out var expectedResult);
+
+            // Act
+            var parsedResult = DurationTimeParser.TryParse(input, out var parsedValue);
+
+            // Assert
+            parsedValue.Should().Be(expectedResult);
+            parsedResult.Should().BeTrue();
+        }
+
         #endregion
 
         #region Value unrolling tests that result in current and next smaller unit
@@ -294,6 +423,202 @@ public static partial class DurationTimeParserTests
 
             // Assert
             parsedValue.Should().Be(expectedResult);
+            parsedResult.Should().BeTrue();
+        }
+
+        #endregion
+
+
+        #region Case insensitivity tests
+
+        [Theory]
+        [MemberData(nameof(DurationTimeParserValidTestData.ValidCaseInsensitiveInputs),
+            MemberType = typeof(DurationTimeParserValidTestData))]
+        public void TryParse_CaseInsensitiveInput_ReturnsTrueAndCorrectTimeSpan(string input, string result)
+        {
+            // Arrange
+            _ = TimeSpan.TryParse(result, out var expectedResult);
+
+            // Act
+            var parsedResult = DurationTimeParser.TryParse(input, out var parsedValue);
+
+            // Assert
+            parsedValue.Should().Be(expectedResult);
+            parsedResult.Should().BeTrue();
+        }
+
+        #endregion
+
+        #region Whitespace-padded input tests
+
+        [Theory]
+        [MemberData(nameof(DurationTimeParserValidTestData.ValidWhitespacePaddedInputs),
+            MemberType = typeof(DurationTimeParserValidTestData))]
+        public void TryParse_WhitespacePaddedInput_ReturnsTrueAndCorrectTimeSpan(string input, string result)
+        {
+            // Arrange
+            _ = TimeSpan.TryParse(result, out var expectedResult);
+
+            // Act
+            var parsedResult = DurationTimeParser.TryParse(input, out var parsedValue);
+
+            // Assert
+            parsedValue.Should().Be(expectedResult);
+            parsedResult.Should().BeTrue();
+        }
+
+        #endregion
+
+        #region Standalone fractional unit tests
+
+        [Theory]
+        [MemberData(nameof(DurationTimeParserValidTestData.ValidStandaloneFractionalUnitInputs),
+            MemberType = typeof(DurationTimeParserValidTestData))]
+        public void TryParse_StandaloneFractionalUnit_ReturnsTrueAndCorrectTimeSpan(string input, string result)
+        {
+            // Arrange
+            _ = TimeSpan.TryParse(result, out var expectedResult);
+
+            // Act
+            var parsedResult = DurationTimeParser.TryParse(input, out var parsedValue);
+
+            // Assert
+            parsedValue.Should().Be(expectedResult);
+            parsedResult.Should().BeTrue();
+        }
+
+        #endregion
+
+        #region Negative unrolling tests
+
+        [Theory]
+        [MemberData(nameof(DurationTimeParserValidTestData.ValidNegativeUnrollingInputs),
+            MemberType = typeof(DurationTimeParserValidTestData))]
+        public void TryParse_NegativeUnrollingInput_ReturnsTrueAndCorrectTimeSpan(string input, string result)
+        {
+            // Arrange
+            _ = TimeSpan.TryParse(result, out var expectedResult);
+
+            // Act
+            var parsedResult = DurationTimeParser.TryParse(input, out var parsedValue);
+
+            // Assert
+            parsedValue.Should().Be(expectedResult);
+            parsedResult.Should().BeTrue();
+        }
+
+        [Theory]
+        [MemberData(nameof(DurationTimeParserValidTestData.ValidNegativeMixedUnrollingAndRollingOverInputs),
+            MemberType = typeof(DurationTimeParserValidTestData))]
+        public void TryParse_NegativeMixedUnrollingAndRollingOverInput_ReturnsTrueAndCorrectTimeSpan(string input, string result)
+        {
+            // Arrange
+            _ = TimeSpan.TryParse(result, out var expectedResult);
+
+            // Act
+            var parsedResult = DurationTimeParser.TryParse(input, out var parsedValue);
+
+            // Assert
+            parsedValue.Should().Be(expectedResult);
+            parsedResult.Should().BeTrue();
+        }
+
+        #endregion
+
+        #region Negative rolling over additional tests
+
+        [Theory]
+        [MemberData(nameof(DurationTimeParserRollingOverTestData.ValidNegativeRollingOver1001MillisecondsInputs),
+            MemberType = typeof(DurationTimeParserRollingOverTestData))]
+        public void TryParse_NegativeRollingOverThousandAndOneMilliseconds_ReturnsTrueAndNegativeOneSecondAndOneMillisecond(string input)
+        {
+            // Arrange
+            // Act
+            var parsedResult = DurationTimeParser.TryParse(input, out var parsedValue);
+
+            // Assert
+            parsedValue.Should().Be(new TimeSpan(0, 0, 0, -1, -1));
+            parsedResult.Should().BeTrue();
+        }
+
+        [Theory]
+        [MemberData(nameof(DurationTimeParserRollingOverTestData.ValidNegativeRollingOver65SecondsInputs),
+            MemberType = typeof(DurationTimeParserRollingOverTestData))]
+        public void TryParse_NegativeRollingOverSixtyFiveSeconds_ReturnsTrueAndNegativeOneMinuteAndFiveSeconds(string input)
+        {
+            // Arrange
+            // Act
+            var parsedResult = DurationTimeParser.TryParse(input, out var parsedValue);
+
+            // Assert
+            parsedValue.Should().Be(new TimeSpan(0, -1, -5));
+            parsedResult.Should().BeTrue();
+        }
+
+        [Theory]
+        [MemberData(nameof(DurationTimeParserRollingOverTestData.ValidNegativeRollingOver65MinutesInputs),
+            MemberType = typeof(DurationTimeParserRollingOverTestData))]
+        public void TryParse_NegativeRollingOverSixtyFiveMinutes_ReturnsTrueAndNegativeOneHourAndFiveMinutes(string input)
+        {
+            // Arrange
+            // Act
+            var parsedResult = DurationTimeParser.TryParse(input, out var parsedValue);
+
+            // Assert
+            parsedValue.Should().Be(new TimeSpan(-1, -5, 0));
+            parsedResult.Should().BeTrue();
+        }
+
+        [Theory]
+        [MemberData(nameof(DurationTimeParserRollingOverTestData.ValidNegativeRollingOverWithNonZeroHigherComponentInputs),
+            MemberType = typeof(DurationTimeParserRollingOverTestData))]
+        public void TryParse_NegativeRollingOverWithNonZeroHigherComponents_ReturnsTrueAndCorrectTimeSpan(string input, string result)
+        {
+            // Arrange
+            _ = TimeSpan.TryParse(result, out var expectedResult);
+
+            // Act
+            var parsedResult = DurationTimeParser.TryParse(input, out var parsedValue);
+
+            // Assert
+            parsedValue.Should().Be(expectedResult);
+            parsedResult.Should().BeTrue();
+        }
+
+        [Theory]
+        [MemberData(nameof(DurationTimeParserRollingOverTestData.ValidNegativeMultiLevelCascadingRollingOverInputs),
+            MemberType = typeof(DurationTimeParserRollingOverTestData))]
+        public void TryParse_NegativeMultiLevelCascadingRollingOver_ReturnsTrueAndCorrectTimeSpan(string input, string result)
+        {
+            // Arrange
+            _ = TimeSpan.TryParse(result, out var expectedResult);
+
+            // Act
+            var parsedResult = DurationTimeParser.TryParse(input, out var parsedValue);
+
+            // Assert
+            parsedValue.Should().Be(expectedResult);
+            parsedResult.Should().BeTrue();
+        }
+
+        #endregion
+
+        #region Boundary value tests
+
+        [Theory]
+        [MemberData(nameof(DurationTimeParserValidTestData.ValidBoundaryInputs),
+            MemberType = typeof(DurationTimeParserValidTestData))]
+        public void TryParse_BoundaryValues_ReturnsTrueAndCorrectTimeSpan(string input, int days, int hours, int minutes,
+            int seconds, int milliseconds)
+        {
+            // Arrange
+            var expected = new TimeSpan(days, hours, minutes, seconds, milliseconds);
+
+            // Act
+            var parsedResult = DurationTimeParser.TryParse(input, out var parsedValue);
+
+            // Assert
+            parsedValue.Should().Be(expected);
             parsedResult.Should().BeTrue();
         }
 

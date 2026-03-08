@@ -3,15 +3,20 @@
 public sealed class DurationTimeParserInvalidTestData
 {
     /// <summary>
-    /// Represents a collection of mixed input formats considered as invalid inputs for
-    /// testing the duration time parsing functionality.
+    /// All invalid inputs combined (mixed formats, malformed, out-of-range, and negative).
     /// </summary>
-    /// <remarks>
-    /// This property provides a diverse dataset of string inputs, including combinations of days,
-    /// hours, minutes, seconds, and milliseconds in various notations and sequences.
-    /// It ensures the parsing method rejects unsuitable input values.
-    /// </remarks>
-    public static TheoryData<string> InvalidMixedFormatInputs =>
+    public static TheoryData<string> AllInvalidInputs =>
+    [
+        .. InvalidMixedFormatInputs,
+        .. InvalidMalformedInputs,
+        .. InvalidOutOfRangeInputs,
+        .. InvalidNegativeFormatInputs
+    ];
+
+    /// <summary>
+    /// Inputs that mix human-readable units with standard time format (e.g. "1d 00:00:00").
+    /// </summary>
+    private static TheoryData<string> InvalidMixedFormatInputs =>
     [
         // Human-readable days + standard time
         "1d 00:00:00",
@@ -134,51 +139,93 @@ public sealed class DurationTimeParserInvalidTestData
         // Full standard format + full human-readable format
         "1.23:45:56.789 1d 2h 3m 4s 500ms",
         "00:00:01 1 second",
-        "1d 1.23:45:56.789 500ms"
+        "1d 1.23:45:56.789 500ms",
+
+        // Negative mixed formats (still invalid — mixing human-readable + standard)
+        "-1d 00:00:00",
+        "-1 day 00:00:00",
+        "-00:00:00 1s",
+        "-00:00:00 1 day",
+        "-1d 00:00:00 1s",
+        "-1.23:45:56.789 1d 2h 3m 4s 500ms"
     ];
 
     /// <summary>
-    /// Represents a collection of strings that are considered invalid inputs for
-    /// testing the duration time parsing functionality.
+    /// Malformed inputs: non-parseable text, unrecognized units, wrong order, missing spaces,
+    /// comma decimals, incomplete standard formats, plus signs, and bad numeric formats.
     /// </summary>
-    /// <remarks>
-    /// This property provides a dataset of invalid strings to ensure the duration
-    /// parsing method correctly identifies and handles erroneous or malformed input values.
-    /// </remarks>
-    public static TheoryData<string> InvalidInputs =>
+    private static TheoryData<string> InvalidMalformedInputs =>
     [
+        // Non-parseable or completely invalid text
+        "invalid",
         "Foo",
         " Bar",
+
+        // Valid value with invalid surrounding text
         "Foo 3s",
         "3s Bar",
         "Foo 00:00:03",
         "00:00:03 Bar",
         "Foo 00:00:03 Bar",
+
+        // Number followed by unrecognized unit
         "3house",
         "3 house",
         "3houses",
         "3 houses",
-        "invalid",
-        "0h0m3s",
+        "1y",
+        "1d 2x",
+
+        // Missing spaces between human-readable components
+        "2s1ms",
+        "3m2s",
+        "4h3m",
+        "5d3h",
+        "3m2s1ms",
+        "4h3m2s",
+        "5d4h3m2s1ms",
+
+        // Human-readable components in the wrong order or duplicated
         "0m 3s 1m",
         "3s 1h",
-        "+3s",
-        "-3s",
+
+        // Comma decimal separator (not supported; use dot)
         "3,5s",
         "3,005s",
         "3,005.0s",
         "3,5 s",
-        "1y",
-        "1d 2x",
+
+        // Incomplete or malformed standard time format
         "00:00",
         "00:00.0",
         "0.00:00",
+
+        // Human-readable values that cause numeric parsing errors
+        "1.2.3 days", // The double.Parse will throw FormatException due to multiple decimal points
+        "1 day 2.5ms", // int.Parse will throw FormatException due to an invalid integer format
+
+        // Input with plus sign (not supported; only minus is allowed)
+        "+00:00:03",
+        "+3s",
+        "+3h",
+        "+00:00:03",
+        "+1d 2h"
+    ];
+
+    /// <summary>
+    /// Out-of-range values: components exceeding valid bounds (e.g. "00:00:60", overflow).
+    /// </summary>
+    private static TheoryData<string> InvalidOutOfRangeInputs =>
+    [
+        // Standard time format with out-of-range components (without days prefix)
         "00:00:60",
         "00:00:61",
         "00:60:00",
         "00:61:00",
         "24:00:00",
         "25:00:00",
+
+        // Standard time format with out-of-range components (with fractional seconds)
         "00:00:00.0001",
         "00:00:60.0",
         "00:00:61.0",
@@ -186,15 +233,103 @@ public sealed class DurationTimeParserInvalidTestData
         "00:61:00.0",
         "24:00:00.0",
         "25:00:00.0",
+
+        // Standard time format with out-of-range components (with days prefix)
         "0.00:00:60",
         "0.00:00:61",
         "0.00:60:00",
         "0.00:61:00",
         "0.24:00:00",
         "0.25:00:00",
+
+        // Human-readable values that cause numeric parsing errors
         "1E+999999999 days", // The value is too large for double.Parse and will throw OverflowException
-        "1.2.3 days", // The double.Parse will throw FormatException due to multiple decimal points
         "999999999 days 23 hours 59 minutes 59 seconds", // This will cause TimeSpan overflow when components are added together
-        "1 day 2.5ms" // int.Parse will throw FormatException due to an invalid integer format
+
+        // --- Negative values ---
+
+        // Standard time format with out-of-range components (without days prefix)
+        "-00:00:60",
+        "-00:00:61",
+        "-00:60:00",
+        "-00:61:00",
+        "-24:00:00",
+        "-25:00:00",
+
+        // Standard time format with out-of-range components (with fractional seconds)
+        "-00:00:00.0001",
+        "-00:00:60.0",
+        "-00:00:61.0",
+        "-00:60:00.0",
+        "-00:61:00.0",
+        "-24:00:00.0",
+        "-25:00:00.0",
+
+        // Standard time format with out-of-range components (with days prefix)
+        "-0.00:00:60",
+        "-0.00:00:61",
+        "-0.00:60:00",
+        "-0.00:61:00",
+        "-0.24:00:00",
+        "-0.25:00:00",
+
+        // Human-readable values that cause numeric parsing errors
+        "-1E+999999999 days", // This value is too small for double.Parse and will throw OverflowException
+        "-999999999 days 23 hours 59 minutes 59 seconds", // This will cause TimeSpan overflow when components are added together
+    ];
+
+    /// <summary>
+    /// Invalid negative inputs: bare minus, doubled/misplaced/trailing minus signs,
+    /// and negative values combined with other malformed elements (bad units, commas, bad numerics).
+    /// </summary>
+    private static TheoryData<string> InvalidNegativeFormatInputs =>
+    [
+        // Input with minus sign only
+        "-",
+        "   -",
+        "-   ",
+
+        // Double minus sign
+        "--00:00:03",
+        "--   00:00:05",
+        "--3s",
+        "--   7s",
+
+        // Pre-component minus sign
+        "3h -30m",
+        "3h - 30m",
+        "-3h -30m",
+        "-  3h -  30m",
+        "--5m --3s",
+        "--  5m --  3s",
+        "-3h -30m -5s",
+
+        // Trailing minus sign
+        "3s-",
+        "3s -",
+        "3s--",
+        "3s  --",
+        "00:00:03-",
+        "00:00:03  -",
+
+        // Mid-position minus sign
+        "3h-30m",
+        "3h- 30m",
+        "3h-30m-7s",
+        "3h-30m- 7s",
+        "3h- 30m- 7s",
+
+        // Negative with invalid unit
+        "-1y",
+        "-3 house",
+
+        // Comma decimal
+        "-3,5s",
+
+        // Negative invalid double
+        "-1.2.3 days", // The double.Parse will throw FormatException due to multiple decimal points
+
+        // Negative invalid double
+        "-1 day 2.5ms", // int.Parse will throw FormatException due to an invalid integer format
     ];
 }

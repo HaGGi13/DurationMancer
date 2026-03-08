@@ -98,7 +98,6 @@ public sealed class DurationTimeParserUnrollingTestData
     public static TheoryData<string, string> ValidUnrollingFractionInputs => new()
     {
         { "1.25d 1.5h 1.5m 1.5s 7ms", "1.07:31:31.507" },
-        { "1.25d 1.5h 1.5m 1.5s 7ms", "1.07:31:31.507" },
         { "1.25d 1.5m 7ms", "1.06:01:30.007" },
         { "1.5m 13ms", "00:01:30.013" }
     };
