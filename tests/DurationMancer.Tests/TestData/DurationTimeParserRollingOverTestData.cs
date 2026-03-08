@@ -3,16 +3,8 @@
 public sealed class DurationTimeParserRollingOverTestData
 {
     /// <summary>
-    /// Represents a collection of human-readable valid input strings that describe durations adding up to one second
-    /// through the use of milliseconds or combinations of time units, intended for testing duration parsing functionality.
+    /// Duration inputs where 1000ms should roll over into 1 second.
     /// </summary>
-    /// <remarks>
-    /// This property includes test data with various formats where durations expressed in milliseconds may
-    /// roll over into a full second. Examples include standalone millisecond declarations such as "1000ms" and
-    /// combinations of time units like "0s 1000ms" or "0 hours 0 minutes 0 seconds 1000 milliseconds."
-    /// It ensures the parsing method correctly recognizes such scenarios and converts them into a consistent
-    /// one-second time span representation.
-    /// </remarks>
     public static TheoryData<string> ValidRollingOver1000MillisecondsInputs =>
     [
         "1000ms",
@@ -56,16 +48,27 @@ public sealed class DurationTimeParserRollingOverTestData
     ];
 
     /// <summary>
-    /// Represents a collection of human-readable valid inputs that span over one second and include an
-    /// additional one millisecond, formatted in various valid representations.
+    /// Negative duration inputs where -1000ms should roll over into -1 second.
     /// </summary>
-    /// <remarks>
-    /// This property provides data to test the parsing of duration values that translate
-    /// to one second and one millisecond combined. The inputs include multiple formats
-    /// with different units (e.g., milliseconds, seconds, minutes, hours, days) and their
-    /// abbreviations. It ensures that the parsing functionality correctly interprets
-    /// diverse duration strings containing exact values of 1001 milliseconds.
-    /// </remarks>
+    public static TheoryData<string> ValidNegativeRollingOver1000MillisecondsInputs =>
+    [
+        "-1000ms",
+        "-1000 ms",
+        "-1000milliseconds",
+        "-1000 milliseconds",
+        "-0s 1000ms",
+        "-0 s 1000 ms",
+        "-0m 0s 1000ms",
+        "-0 minutes 0 seconds 1000 milliseconds",
+        "-0h 0m 0s 1000ms",
+        "-0 hours 0 minutes 0 seconds 1000 milliseconds",
+        "-0d 0h 0m 0s 1000ms",
+        "-0 days 0 hours 0 minutes 0 seconds 1000 milliseconds"
+    ];
+
+    /// <summary>
+    /// Duration inputs where 1001ms should roll over into 1 second and 1 millisecond.
+    /// </summary>
     public static TheoryData<string> ValidRollingOver1001MillisecondsInputs =>
     [
         "1001ms",
@@ -109,14 +112,8 @@ public sealed class DurationTimeParserRollingOverTestData
     ];
 
     /// <summary>
-    /// Contains valid human-readable input strings that represent durations rolling over 60 seconds
-    /// to test if the duration parser accurately normalizes such inputs to one minute.
+    /// Duration inputs where 60 seconds should roll over into 1 minute.
     /// </summary>
-    /// <remarks>
-    /// This property includes diverse formats of input strings representing 60 seconds or equivalent,
-    /// such as "60s", "0m 60s", "0h 0m 60s", and their variations with different spacings and unit formats.
-    /// It ensures the parsing functionality handles these cases correctly and interprets them as one minute.
-    /// </remarks>
     public static TheoryData<string> ValidRollingOver60SecondsInputs =>
     [
         "60s",
@@ -160,16 +157,25 @@ public sealed class DurationTimeParserRollingOverTestData
     ];
 
     /// <summary>
-    /// Represents a collection of valid human-readable input strings that specify durations
-    /// rolling over 65 seconds, used for testing duration parsing functionality.
+    /// Negative duration inputs where -60s should roll over into -1 minute.
     /// </summary>
-    /// <remarks>
-    /// This property provides test data containing various formats for expressing durations
-    /// that consolidate or exceed 65 seconds. It includes representations with
-    /// seconds alone or combined with other units such as minutes, hours, and days.
-    /// The data ensures that the parsing method correctly interprets diverse input formats
-    /// while respecting unit specifications and spacing variations.
-    /// </remarks>
+    public static TheoryData<string> ValidNegativeRollingOver60SecondsInputs =>
+    [
+        "-60s",
+        "-60 s",
+        "-60sec",
+        "-60 seconds",
+        "-0m 60s",
+        "-0 minutes 60 seconds",
+        "-0h 0m 60s",
+        "-0 hours 0 minutes 60 seconds",
+        "-0d 0h 0m 60s",
+        "-0 days 0 hours 0 minutes 60 seconds"
+    ];
+
+    /// <summary>
+    /// Duration inputs where 65 seconds should roll over into 1 minute and 5 seconds.
+    /// </summary>
     public static TheoryData<string> ValidRollingOver65SecondsInputs =>
     [
         "65s",
@@ -213,15 +219,8 @@ public sealed class DurationTimeParserRollingOverTestData
     ];
 
     /// <summary>
-    /// Represents a set of valid human-readable input strings that specify durations rolling over 60 minutes,
-    /// used for testing duration parsing functionality.
+    /// Duration inputs where 60 minutes should roll over into 1 hour.
     /// </summary>
-    /// <remarks>
-    /// This property contains various input formats for durations equal to or exceeding 60 minutes
-    /// but represented within a minute-based syntax. Examples include "60m", "60 minutes", or complex
-    /// combinations such as "0h 60m 0s". It validates that the parsing logic properly normalizes these
-    /// cases and interprets them as equivalent to one hour.
-    /// </remarks>
     public static TheoryData<string> ValidRollingOver60MinutesInputs =>
     [
         "60m",
@@ -265,18 +264,23 @@ public sealed class DurationTimeParserRollingOverTestData
     ];
 
     /// <summary>
-    /// Represents a collection of valid human-readable input strings that encapsulate
-    /// durations rolling over 65 minutes. These inputs are used to verify
-    /// time parsing functionality that normalizes such cases into valid
-    /// hour-and-minute formats.
+    /// Negative duration inputs where -60m should roll over into -1 hour.
     /// </summary>
-    /// <remarks>
-    /// This property includes varied string representations of durations
-    /// that specify 65 minutes, often accompanied by additional time segments
-    /// like hours, seconds, and milliseconds. The test cases ensure the parsing
-    /// method correctly converts these inputs into the appropriate TimeSpan
-    /// representation, typically equivalent to 1 hour and 5 minutes.
-    /// </remarks>
+    public static TheoryData<string> ValidNegativeRollingOver60MinutesInputs =>
+    [
+        "-60m",
+        "-60 m",
+        "-60min",
+        "-60 minutes",
+        "-0h 60m",
+        "-0 hours 60 minutes",
+        "-0d 0h 60m",
+        "-0 days 0 hours 60 minutes"
+    ];
+
+    /// <summary>
+    /// Duration inputs where 65 minutes should roll over into 1 hour and 5 minutes.
+    /// </summary>
     public static TheoryData<string> ValidRollingOver65MinutesInputs =>
     [
         "65m",
@@ -320,16 +324,16 @@ public sealed class DurationTimeParserRollingOverTestData
     ];
 
     /// <summary>
-    /// Represents a collection of human-readable input strings that signify a time duration
-    /// rolling over 24 hours, formatted in various valid notations.
+    /// Duration inputs where 24 hours should roll over into 1 day.
     /// </summary>
-    /// <remarks>
-    /// This property is used to test parsing functionality for duration strings
-    /// that normalize to a single day (24 hours). It includes variations with
-    /// different formats, units, and separators to validate flexible input handling.
-    /// </remarks>
     public static TheoryData<string> ValidRollingOver24HoursInputs =>
     [
+        "24h",
+        "24hour",
+        "24hours",
+        "24 h",
+        "24 hour",
+        "24 hours",
         "24h 0m 0s",
         "24hour 0min 0sec",
         "24hour 0minute 0second",
@@ -355,17 +359,31 @@ public sealed class DurationTimeParserRollingOverTestData
     ];
 
     /// <summary>
-    /// Represents a collection of human-readable input strings that signify a time duration
-    /// rolling over 25 hours, formatted in various valid notations.
+    /// Negative duration inputs where -24h should roll over into -1 day.
     /// </summary>
-    /// <remarks>
-    /// This property provides test data with various syntactical representations of durations
-    /// exceeding 24 hours, formatted in different combinations of hours, minutes, seconds,
-    /// days, and optional milliseconds. It ensures the parsing method correctly identifies
-    /// and processes these extended time inputs without errors or inaccuracies.
-    /// </remarks>
+    public static TheoryData<string> ValidNegativeRollingOver24HoursInputs =>
+    [
+        "-24h",
+        "-24 h",
+        "-24hours",
+        "-24 hours",
+        "-24h 0m 0s",
+        "-24 hours 0 minutes 0 seconds",
+        "-0d 24h 0m 0s",
+        "-0 days 24 hours 0 minutes 0 seconds"
+    ];
+
+    /// <summary>
+    /// Duration inputs where 25 hours should roll over into 1 day and 1 hour.
+    /// </summary>
     public static TheoryData<string> ValidRollingOver25HoursInputs =>
     [
+        "25h",
+        "25hour",
+        "25hours",
+        "25 h",
+        "25 hour",
+        "25 hours",
         "25h 0m 0s",
         "25hour 0min 0sec",
         "25hour 0minute 0second",
@@ -389,4 +407,197 @@ public sealed class DurationTimeParserRollingOverTestData
         "0day 25 hour 0 minute 0second 0millisecond",
         "0days  25hours 0minutes 0 seconds 0milliseconds"
     ];
+
+    /// <summary>
+    /// Negative duration inputs where -25h should roll over into -1 day and -1 hour.
+    /// </summary>
+    public static TheoryData<string> ValidNegativeRollingOver25HoursInputs =>
+    [
+        "-25h",
+        "-25 h",
+        "-25hours",
+        "-25 hours",
+        "-25h 0m 0s",
+        "-25 hours 0 minutes 0 seconds",
+        "-0d 25h 0m 0s",
+        "-0 days 25 hours 0 minutes 0 seconds"
+    ];
+
+
+    /// <summary>
+    /// Negative duration inputs where -1001ms should roll over into -1 second and -1 millisecond.
+    /// </summary>
+    public static TheoryData<string> ValidNegativeRollingOver1001MillisecondsInputs =>
+    [
+        "-1001ms",
+        "-1001 ms",
+        "-1001milliseconds",
+        "-1001 milliseconds",
+        "-0s 1001ms",
+        "-0 s 1001 ms",
+        "-0m 0s 1001ms",
+        "-0 minutes 0 seconds 1001 milliseconds",
+        "-0h 0m 0s 1001ms",
+        "-0 hours 0 minutes 0 seconds 1001 milliseconds",
+        "-0d 0h 0m 0s 1001ms",
+        "-0 days 0 hours 0 minutes 0 seconds 1001 milliseconds"
+    ];
+
+    /// <summary>
+    /// Negative duration inputs where -65s should roll over into -1 minute and -5 seconds.
+    /// </summary>
+    public static TheoryData<string> ValidNegativeRollingOver65SecondsInputs =>
+    [
+        "-65s",
+        "-65 s",
+        "-65sec",
+        "-65 seconds",
+        "-0m 65s",
+        "-0 minutes 65 seconds",
+        "-0h 0m 65s",
+        "-0 hours 0 minutes 65 seconds",
+        "-0d 0h 0m 65s",
+        "-0 days 0 hours 0 minutes 65 seconds"
+    ];
+
+    /// <summary>
+    /// Negative duration inputs where -65m should roll over into -1 hour and -5 minutes.
+    /// </summary>
+    public static TheoryData<string> ValidNegativeRollingOver65MinutesInputs =>
+    [
+        "-65m",
+        "-65 m",
+        "-65min",
+        "-65 minutes",
+        "-0h 65m",
+        "-0 hours 65 minutes",
+        "-0d 0h 65m",
+        "-0 days 0 hours 65 minutes"
+    ];
+
+    /// <summary>
+    /// Negative rolling over with non-zero higher components (e.g. "-1m 60s" → -2m, "-1d 24h" → -2d).
+    /// </summary>
+    public static TheoryData<string, string> ValidNegativeRollingOverWithNonZeroHigherComponentInputs => new()
+    {
+        // Milliseconds rolling into non-zero seconds
+        { "-5s 1000ms", "-00:00:06" },
+        { "-5 seconds 1000 milliseconds", "-00:00:06" },
+        { "-59s 1000ms", "-00:01:00" },
+
+        // Seconds rolling into non-zero minutes
+        { "-1m 60s", "-00:02:00" },
+        { "-1 minute 60 seconds", "-00:02:00" },
+        { "-5m 65s", "-00:06:05" },
+        { "-5 minutes 65 seconds", "-00:06:05" },
+
+        // Minutes rolling into non-zero hours
+        { "-1h 60m", "-02:00:00" },
+        { "-1 hour 60 minutes", "-02:00:00" },
+        { "-2h 65m", "-03:05:00" },
+        { "-2 hours 65 minutes", "-03:05:00" },
+
+        // Hours rolling into non-zero days
+        { "-1d 24h", "-2.00:00:00" },
+        { "-1 day 24 hours", "-2.00:00:00" },
+        { "-1d 25h", "-2.01:00:00" },
+        { "-1 day 25 hours", "-2.01:00:00" },
+        { "-2d 48h", "-4.00:00:00" },
+        { "-2 days 48 hours", "-4.00:00:00" }
+    };
+
+    /// <summary>
+    /// Negative multi-level cascading rolling over (e.g. "-59m 60s" → -1h, "-23h 59m 60s" → -1d).
+    /// </summary>
+    public static TheoryData<string, string> ValidNegativeMultiLevelCascadingRollingOverInputs => new()
+    {
+        // Seconds cascade through minutes to hours
+        { "-59m 60s", "-01:00:00" },
+        { "-59 minutes 60 seconds", "-01:00:00" },
+        { "-59m 61s", "-01:00:01" },
+
+        // Seconds cascade through minutes and hours to days
+        { "-23h 59m 60s", "-1.00:00:00" },
+        { "-23 hours 59 minutes 60 seconds", "-1.00:00:00" },
+
+        // Milliseconds cascade through seconds to minutes
+        { "-0m 59s 1000ms", "-00:01:00" },
+        { "-0 minutes 59 seconds 1000 milliseconds", "-00:01:00" },
+
+        // Full cascade: milliseconds → seconds → minutes → hours → days
+        { "-23h 59m 59s 1000ms", "-1.00:00:00" },
+        { "-23 hours 59 minutes 59 seconds 1000 milliseconds", "-1.00:00:00" },
+
+        // Multiple levels with non-zero higher components
+        { "-1d 23h 59m 60s", "-2.00:00:00" },
+        { "-1 day 23 hours 59 minutes 60 seconds", "-2.00:00:00" },
+        { "-1d 23h 60m", "-2.00:00:00" },
+        { "-1 day 23 hours 60 minutes", "-2.00:00:00" }
+    };
+
+    /// <summary>
+    /// Rolling over with non-zero higher components (e.g. "1m 60s" → 2m, "1d 24h" → 2d).
+    /// </summary>
+    public static TheoryData<string, string> ValidRollingOverWithNonZeroHigherComponentInputs => new()
+    {
+        // Milliseconds rolling into non-zero seconds
+        { "5s 1000ms", "00:00:06" },
+        { "5 seconds 1000 milliseconds", "00:00:06" },
+        { "59s 1000ms", "00:01:00" },
+        { "59 seconds 1001 milliseconds", "00:01:00.001" },
+
+        // Seconds rolling into non-zero minutes
+        { "1m 60s", "00:02:00" },
+        { "1 minute 60 seconds", "00:02:00" },
+        { "5m 65s", "00:06:05" },
+        { "5 minutes 65 seconds", "00:06:05" },
+
+        // Minutes rolling into non-zero hours
+        { "1h 60m", "02:00:00" },
+        { "1 hour 60 minutes", "02:00:00" },
+        { "2h 65m", "03:05:00" },
+        { "2 hours 65 minutes", "03:05:00" },
+
+        // Hours rolling into non-zero days
+        { "1d 24h", "2.00:00:00" },
+        { "1 day 24 hours", "2.00:00:00" },
+        { "1d 25h", "2.01:00:00" },
+        { "1 day 25 hours", "2.01:00:00" },
+        { "2d 48h", "4.00:00:00" },
+        { "2 days 48 hours", "4.00:00:00" }
+    };
+
+    /// <summary>
+    /// Multi-level cascading rolling over (e.g. "59m 60s" → 1h, "23h 59m 60s" → 1d).
+    /// </summary>
+    public static TheoryData<string, string> ValidMultiLevelCascadingRollingOverInputs => new()
+    {
+        // Seconds cascade through minutes to hours
+        { "59m 60s", "01:00:00" },
+        { "59 minutes 60 seconds", "01:00:00" },
+        { "59m 61s", "01:00:01" },
+
+        // Seconds cascade through minutes and hours to days
+        { "23h 59m 60s", "1.00:00:00" },
+        { "23 hours 59 minutes 60 seconds", "1.00:00:00" },
+
+        // Milliseconds cascade through seconds to minutes
+        { "0m 59s 1000ms", "00:01:00" },
+        { "0 minutes 59 seconds 1000 milliseconds", "00:01:00" },
+        { "0m 59s 1001ms", "00:01:00.001" },
+
+        // Milliseconds cascade through seconds and minutes to hours
+        { "59m 59s 1000ms", "01:00:00" },
+        { "59 minutes 59 seconds 1000 milliseconds", "01:00:00" },
+
+        // Full cascade: milliseconds → seconds → minutes → hours → days
+        { "23h 59m 59s 1000ms", "1.00:00:00" },
+        { "23 hours 59 minutes 59 seconds 1000 milliseconds", "1.00:00:00" },
+
+        // Multiple levels with non-zero higher components
+        { "1d 23h 59m 60s", "2.00:00:00" },
+        { "1 day 23 hours 59 minutes 60 seconds", "2.00:00:00" },
+        { "1d 23h 60m", "2.00:00:00" },
+        { "1 day 23 hours 60 minutes", "2.00:00:00" }
+    };
 }

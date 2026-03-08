@@ -200,6 +200,20 @@ public sealed class DurationTimeParserValidTestData
     };
 
     /// <summary>
+    /// Valid negative inputs in standard duration format that should parse to the corresponding negative TimeSpan.
+    /// </summary>
+    public static TheoryData<string, int, int, int, int, int> ValidNegativeStandardDurationFormatInputs => new()
+    {
+        { "-00:00:00", 0, 0, 0, 0, 0 },
+        { "-00:00:03", 0, 0, 0, -3, 0 },
+        { "-01:00:00", 0, -1, 0, 0, 0 },
+        { "-00:30:00", 0, 0, -30, 0, 0 },
+        { "-1.00:00:00", -1, 0, 0, 0, 0 },
+        { "-00:00:00.500", 0, 0, 0, 0, -500 },
+        { "-1.23:45:56.789", -1, -23, -45, -56, -789 }
+    };
+
+    /// <summary>
     /// Represents a collection of valid human-readable duration format input strings
     /// mapped to their equivalent standardized time span representations.
     /// </summary>
@@ -225,6 +239,25 @@ public sealed class DurationTimeParserValidTestData
     };
 
     /// <summary>
+    /// Valid negative inputs in human-readable format that should parse to the corresponding negative TimeSpan.
+    /// </summary>
+    public static TheoryData<string, string> ValidNegativeHumanReadableFormatInputs => new()
+    {
+        { "-1d", "-1.00:00:00" },
+        { "-2 days", "-2.00:00:00" },
+        { "-3h", "-03:00:00" },
+        { "-4 hours", "-04:00:00" },
+        { "-5m", "-00:05:00" },
+        { "-6 minutes", "-00:06:00" },
+        { "-7s", "-00:00:07" },
+        { "-8 seconds", "-00:00:08" },
+        { "-100ms", "-00:00:00.100" },
+        { "-1d 2h 3m 4s 500ms", "-1.02:03:04.500" },
+        { "- 3s", "-00:00:03" },
+        { "-  1 day 2 hours 3 minutes 4 seconds 500 milliseconds", "-1.02:03:04.500" }
+    };
+
+    /// <summary>
     /// Represents a collection of valid human-readable input strings that include combinations of partial
     /// rolling-over and unrolling duration formats for testing duration parsing functionality.
     /// </summary>
@@ -240,5 +273,145 @@ public sealed class DurationTimeParserValidTestData
         { "0.3m 100.07s", "00:01:58.070" },
         { "0.01h 100.007s", "00:02:16.007" },
         { "0.0003d", "00:00:25.920" }
+    };
+
+
+    /// <summary>
+    /// Valid inputs with case-insensitive unit abbreviations (uppercase, mixed case).
+    /// The regex uses <see cref="System.Text.RegularExpressions.RegexOptions.IgnoreCase"/>,
+    /// so these should all parse correctly.
+    /// </summary>
+    public static TheoryData<string, string> ValidCaseInsensitiveInputs => new()
+    {
+        // Uppercase abbreviations
+        { "3S", "00:00:03" },
+        { "5M", "00:05:00" },
+        { "2H", "02:00:00" },
+        { "1D", "1.00:00:00" },
+        { "100MS", "00:00:00.100" },
+
+        // Mixed case abbreviations
+        { "3Sec", "00:00:03" },
+        { "5Min", "00:05:00" },
+        { "2Hour", "02:00:00" },
+        { "1Day", "1.00:00:00" },
+        { "100Milliseconds", "00:00:00.100" },
+
+        // Full uppercase
+        { "3SEC", "00:00:03" },
+        { "5MINUTES", "00:05:00" },
+        { "2HOURS", "02:00:00" },
+        { "1DAY", "1.00:00:00" },
+        { "100MILLISECONDS", "00:00:00.100" },
+
+        // Mixed case with spaces
+        { "1D 2H 3M 4S 500MS", "1.02:03:04.500" },
+        { "1 Day 2 Hours 3 Minutes 4 Seconds 500 Milliseconds", "1.02:03:04.500" }
+    };
+
+    /// <summary>
+    /// Valid inputs with leading/trailing whitespace that should be trimmed before parsing.
+    /// </summary>
+    public static TheoryData<string, string> ValidWhitespacePaddedInputs => new()
+    {
+        // Leading whitespace
+        { "  3s", "00:00:03" },
+        { "  00:00:03", "00:00:03" },
+
+        // Trailing whitespace
+        { "3s  ", "00:00:03" },
+        { "00:00:03  ", "00:00:03" },
+
+        // Both leading and trailing whitespace
+        { "  3s  ", "00:00:03" },
+        { "  00:00:03  ", "00:00:03" },
+        { "  1d 2h 3m 4s 500ms  ", "1.02:03:04.500" },
+        { "  1.23:45:56.789  ", "1.23:45:56.789" }
+    };
+
+    /// <summary>
+    /// Valid standalone fractional unit inputs (e.g. "0.5d" → 12h, "0.5h" → 30m).
+    /// </summary>
+    public static TheoryData<string, string> ValidStandaloneFractionalUnitInputs => new()
+    {
+        // Fractional days
+        { "0.5d", "12:00:00" },
+        { "0.5 days", "12:00:00" },
+        { "1.5d", "1.12:00:00" },
+
+        // Fractional hours
+        { "0.5h", "00:30:00" },
+        { "0.5 hours", "00:30:00" },
+        { "1.5h", "01:30:00" },
+
+        // Fractional minutes
+        { "0.5m", "00:00:30" },
+        { "0.5 minutes", "00:00:30" },
+        { "1.5m", "00:01:30" },
+
+        // Fractional seconds
+        { "0.5s", "00:00:00.500" },
+        { "0.5 seconds", "00:00:00.500" },
+        { "1.5s", "00:00:01.500" }
+    };
+
+    /// <summary>
+    /// Valid negative inputs with fractional/unrolling values combined with the minus prefix.
+    /// </summary>
+    public static TheoryData<string, string> ValidNegativeUnrollingInputs => new()
+    {
+        // Negative fractional seconds
+        { "-3.5s", "-00:00:03.500" },
+        { "-3.5 seconds", "-00:00:03.500" },
+        { "-0.5s", "-00:00:00.500" },
+
+        // Negative fractional minutes
+        { "-1.5m", "-00:01:30" },
+        { "-1.5 minutes", "-00:01:30" },
+        { "-0.5m", "-00:00:30" },
+
+        // Negative fractional hours
+        { "-1.5h", "-01:30:00" },
+        { "-1.5 hours", "-01:30:00" },
+        { "-0.5h", "-00:30:00" },
+
+        // Negative fractional days
+        { "-0.5d", "-12:00:00" },
+        { "-0.5 days", "-12:00:00" },
+        { "-1.5d", "-1.12:00:00" },
+
+        // Negative combined fractional
+        { "-1.25d 1.5h 1.5m 1.5s 7ms", "-1.07:31:31.507" },
+        { "-1.5m 13ms", "-00:01:30.013" }
+    };
+
+    /// <summary>
+    /// Valid negative inputs with mixed unrolling and rolling over values.
+    /// </summary>
+    public static TheoryData<string, string> ValidNegativeMixedUnrollingAndRollingOverInputs => new()
+    {
+        { "-69.5m 0.5s", "-01:09:30.500" },
+        { "-0.3m 100.07s", "-00:01:58.070" },
+        { "-0.01h 100.007s", "-00:02:16.007" },
+        { "-0.0003d", "-00:00:25.920" }
+    };
+
+    /// <summary>
+    /// Valid inputs near the <see cref="TimeSpan.MaxValue"/> and <see cref="TimeSpan.MinValue"/> boundaries.
+    /// </summary>
+    public static TheoryData<string, int, int, int, int, int> ValidBoundaryInputs => new()
+    {
+        // Large but valid standard format
+        { "10675199.02:48:05.477", 10675199, 2, 48, 5, 477 },
+
+        // Large but valid human-readable
+        { "10675199d 2h 48m 5s 477ms", 10675199, 2, 48, 5, 477 },
+
+        // Negative large but valid standard format
+        { "-10675199.02:48:05.477", -10675199, -2, -48, -5, -477 },
+
+        // Single day boundary
+        { "365d", 365, 0, 0, 0, 0 },
+        { "365 days", 365, 0, 0, 0, 0 }
     };
 }

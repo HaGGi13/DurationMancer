@@ -8,6 +8,7 @@ namespace DurationMancer;
 /// </summary>
 public static partial class DurationTimeParser
 {
+    private const string MinusPattern = @"(?<minus>-)?\s*";
     private const string DaysPattern = @"(?<days>\d+(?:\.\d+)?)\s*(d|day|days)\b";
     private const string HoursPattern = @"(?<hours>\d+(?:\.\d+)?)\s*(h|hour|hours)\b";
     private const string MillisecondsPattern = @"(?<milliseconds>\d+)\s*(ms|millisecond|milliseconds)\b";
@@ -15,14 +16,20 @@ public static partial class DurationTimeParser
     private const string SecondsPattern = @"(?<seconds>\d+(?:\.\d+)?)\s*(s|sec|second|seconds)\b";
 
     private const string StandardDurationTimeFormat =
-        @"^(?:(?<d>\d+)\.)?(?<hh>[01]\d|2[0-3]):(?<mm>[0-5]\d):(?<ss>[0-5]\d)(?:\.(?<ms>\d{0,3}))?$";
+        @$"^{MinusPattern}(?:(?<d>\d+)\.)?(?<hh>[01]\d|2[0-3]):(?<mm>[0-5]\d):(?<ss>[0-5]\d)(?:\.(?<ms>\d{{0,3}}))?$";
 
-    private const string TimePattern = $"{StandardDurationTimeFormat}|" +
-                                       @$"^(?:{DaysPattern})?\s*" +
-                                       @$"(?:{HoursPattern})?\s*" +
-                                       @$"(?:{MinutesPattern})?\s*" +
-                                       @$"(?:{SecondsPattern})?\s*" +
-                                       $"(?:{MillisecondsPattern})?$";
+    private const string AnyHumanReadableUnitPattern =
+        @"\d+(?:\.\d+)?\s*(?:d|day|days|h|hour|hours|m|min|minute|minutes|s|sec|second|seconds)\b|\d+\s*(?:ms|millisecond|milliseconds)\b";
+
+    private const string HumanReadableDurationTimeFormat =
+        @$"^{MinusPattern}(?=.*(?:{AnyHumanReadableUnitPattern}))" +
+        @$"(?:{DaysPattern})?\s*" +
+        @$"(?:{HoursPattern})?\s*" +
+        @$"(?:{MinutesPattern})?\s*" +
+        @$"(?:{SecondsPattern})?\s*" +
+        @$"(?:{MillisecondsPattern})?$";
+
+    private const string TimePattern = $"{StandardDurationTimeFormat}|{HumanReadableDurationTimeFormat}";
 
     private static readonly Regex TimeRegex = CreateTimeFormatRegex();
 
@@ -40,8 +47,8 @@ public static partial class DurationTimeParser
     /// Supports two format types:
     /// <para>
     /// 1. Standard duration format:<br />
-    /// - [d.]HH:mm:ss[.fff]<br />
-    /// 2. Human-readable format with combinations of:<br />
+    /// - [-][d.]HH:mm:ss[.fff]<br />
+    /// 2. Human-readable format with combinations of the following elements, optionally preceded by "-":<br />
     /// - days: "1d", "2 days"<br />
     /// - hours: "1h", "2 hours"<br />
     /// - minutes: "1m", "5 minutes"<br />
@@ -51,6 +58,7 @@ public static partial class DurationTimeParser
     /// Examples of valid human-readable formats:<br />
     /// - "1s"<br />
     /// - "5 minutes"<br />
+    /// - "-7 minutes"<br />
     /// - "3m 10s"<br />
     /// - "1 hour 30 minutes"<br />
     /// - "2 days 4 hours 15m 30s"<br />
@@ -73,12 +81,24 @@ public static partial class DurationTimeParser
             return false;
         }
 
-        return TryParseDurationFormat(match, out timeSpan) ||
-               TryParseHumanReadableDurationFormat(match, out timeSpan);
+        if (!TryParseDurationFormat(match, out timeSpan) &&
+            !TryParseHumanReadableDurationFormat(match, out timeSpan))
+        {
+            return false;
+        }
+
+        var isNegative = match.Groups["minus"].Success;
+        if (isNegative)
+        {
+            timeSpan = -timeSpan;
+        }
+
+        return true;
     }
 
     /// <summary>
     /// Parses a given input string into a <see cref="TimeSpan" /> representation.
+    /// Supports standard duration format and human-readable duration format.
     /// Throws a <see cref="FormatException" /> if the input string is not in a valid duration format.
     /// </summary>
     /// <param name="input">The input string that represents a duration in a valid format.</param>
@@ -91,7 +111,8 @@ public static partial class DurationTimeParser
 
         return TryParse(input, out var result)
             ? result
-            : throw new FormatException($"Input string '{input}' was not in a correct duration format.");
+            : throw new FormatException(
+                $"The input string '{input}' was not recognized as a valid duration. Expected either standard format '[-][d.]HH:mm:ss[.fff]' or human-readable format (e.g. '[-]1d 2h 30m 15s 100ms').");
     }
 
     /// <summary>
@@ -193,8 +214,12 @@ public static partial class DurationTimeParser
     /// <returns>The new rounded <see cref="TimeSpan" /> instance.</returns>
     private static TimeSpan RoundOnMilliseconds(TimeSpan timeSpan)
     {
-        var roundedTicks =
-            (long)(Math.Round((double)timeSpan.Ticks / TimeSpan.TicksPerMillisecond) * TimeSpan.TicksPerMillisecond);
+        var milliseconds = (double)timeSpan.Ticks / TimeSpan.TicksPerMillisecond;
+
+        // Round to the nearest millisecond
+        var roundedMilliseconds = Math.Round(milliseconds);
+
+        var roundedTicks = (long)roundedMilliseconds * TimeSpan.TicksPerMillisecond;
 
         return new TimeSpan(roundedTicks);
     }
