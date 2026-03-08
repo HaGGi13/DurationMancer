@@ -1,11 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    </PropertyGroup>
+
+    <PropertyGroup>
         <PackageId>DurationMancer</PackageId>
-        <Version>1.0.0</Version>
+        <Version>0.0.1</Version>
         <Authors>Christopher Wolf</Authors>
         <Description>
-            DurationMancer parses human‑readable time expressions like “7h 13m”, “1:45:00”, or “5 days 7min 13ms” into TimeSpan values. It supports flexible formats, abbreviations, and natural‑language‑style inputs.
+            DurationMancer parses human‑readable and standard format time expressions like "7h 13m" or "00:00:05" into TimeSpan values.
             It parses duration values only and does not extract them from full sentences or larger text.
         </Description>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
