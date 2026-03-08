@@ -278,7 +278,7 @@ public sealed class DurationTimeParserValidTestData
 
     /// <summary>
     /// Valid inputs with case-insensitive unit abbreviations (uppercase, mixed case).
-    /// The regex uses <see cref="System.Text.RegularExpressions.RegexOptions.IgnoreCase"/>,
+    /// The regex uses <see cref="System.Text.RegularExpressions.RegexOptions.IgnoreCase" />,
     /// so these should all parse correctly.
     /// </summary>
     public static TheoryData<string, string> ValidCaseInsensitiveInputs => new()
@@ -397,7 +397,7 @@ public sealed class DurationTimeParserValidTestData
     };
 
     /// <summary>
-    /// Valid inputs near the <see cref="TimeSpan.MaxValue"/> and <see cref="TimeSpan.MinValue"/> boundaries.
+    /// Valid inputs near the <see cref="TimeSpan.MaxValue" /> and <see cref="TimeSpan.MinValue" /> boundaries.
     /// </summary>
     public static TheoryData<string, int, int, int, int, int> ValidBoundaryInputs => new()
     {

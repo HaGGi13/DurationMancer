@@ -275,7 +275,7 @@ public sealed class DurationTimeParserInvalidTestData
 
         // Human-readable values that cause numeric parsing errors
         "-1E+999999999 days", // This value is too small for double.Parse and will throw OverflowException
-        "-999999999 days 23 hours 59 minutes 59 seconds", // This will cause TimeSpan overflow when components are added together
+        "-999999999 days 23 hours 59 minutes 59 seconds" // This will cause TimeSpan overflow when components are added together
     ];
 
     /// <summary>
@@ -330,6 +330,6 @@ public sealed class DurationTimeParserInvalidTestData
         "-1.2.3 days", // The double.Parse will throw FormatException due to multiple decimal points
 
         // Negative invalid double
-        "-1 day 2.5ms", // int.Parse will throw FormatException due to an invalid integer format
+        "-1 day 2.5ms" // int.Parse will throw FormatException due to an invalid integer format
     ];
 }

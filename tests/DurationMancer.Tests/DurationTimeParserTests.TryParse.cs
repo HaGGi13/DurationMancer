@@ -129,6 +129,88 @@ public static partial class DurationTimeParserTests
 
         #endregion
 
+
+        #region Case insensitivity tests
+
+        [Theory]
+        [MemberData(nameof(DurationTimeParserValidTestData.ValidCaseInsensitiveInputs),
+            MemberType = typeof(DurationTimeParserValidTestData))]
+        public void TryParse_CaseInsensitiveInput_ReturnsTrueAndCorrectTimeSpan(string input, string result)
+        {
+            // Arrange
+            _ = TimeSpan.TryParse(result, out var expectedResult);
+
+            // Act
+            var parsedResult = DurationTimeParser.TryParse(input, out var parsedValue);
+
+            // Assert
+            parsedValue.Should().Be(expectedResult);
+            parsedResult.Should().BeTrue();
+        }
+
+        #endregion
+
+        #region Whitespace-padded input tests
+
+        [Theory]
+        [MemberData(nameof(DurationTimeParserValidTestData.ValidWhitespacePaddedInputs),
+            MemberType = typeof(DurationTimeParserValidTestData))]
+        public void TryParse_WhitespacePaddedInput_ReturnsTrueAndCorrectTimeSpan(string input, string result)
+        {
+            // Arrange
+            _ = TimeSpan.TryParse(result, out var expectedResult);
+
+            // Act
+            var parsedResult = DurationTimeParser.TryParse(input, out var parsedValue);
+
+            // Assert
+            parsedValue.Should().Be(expectedResult);
+            parsedResult.Should().BeTrue();
+        }
+
+        #endregion
+
+        #region Standalone fractional unit tests
+
+        [Theory]
+        [MemberData(nameof(DurationTimeParserValidTestData.ValidStandaloneFractionalUnitInputs),
+            MemberType = typeof(DurationTimeParserValidTestData))]
+        public void TryParse_StandaloneFractionalUnit_ReturnsTrueAndCorrectTimeSpan(string input, string result)
+        {
+            // Arrange
+            _ = TimeSpan.TryParse(result, out var expectedResult);
+
+            // Act
+            var parsedResult = DurationTimeParser.TryParse(input, out var parsedValue);
+
+            // Assert
+            parsedValue.Should().Be(expectedResult);
+            parsedResult.Should().BeTrue();
+        }
+
+        #endregion
+
+        #region Boundary value tests
+
+        [Theory]
+        [MemberData(nameof(DurationTimeParserValidTestData.ValidBoundaryInputs),
+            MemberType = typeof(DurationTimeParserValidTestData))]
+        public void TryParse_BoundaryValues_ReturnsTrueAndCorrectTimeSpan(string input, int days, int hours, int minutes,
+            int seconds, int milliseconds)
+        {
+            // Arrange
+            var expected = new TimeSpan(days, hours, minutes, seconds, milliseconds);
+
+            // Act
+            var parsedResult = DurationTimeParser.TryParse(input, out var parsedValue);
+
+            // Assert
+            parsedValue.Should().Be(expected);
+            parsedResult.Should().BeTrue();
+        }
+
+        #endregion
+
         #region Value rolling over tests that result in next bigger unit
 
         [Theory]
@@ -428,67 +510,6 @@ public static partial class DurationTimeParserTests
 
         #endregion
 
-
-        #region Case insensitivity tests
-
-        [Theory]
-        [MemberData(nameof(DurationTimeParserValidTestData.ValidCaseInsensitiveInputs),
-            MemberType = typeof(DurationTimeParserValidTestData))]
-        public void TryParse_CaseInsensitiveInput_ReturnsTrueAndCorrectTimeSpan(string input, string result)
-        {
-            // Arrange
-            _ = TimeSpan.TryParse(result, out var expectedResult);
-
-            // Act
-            var parsedResult = DurationTimeParser.TryParse(input, out var parsedValue);
-
-            // Assert
-            parsedValue.Should().Be(expectedResult);
-            parsedResult.Should().BeTrue();
-        }
-
-        #endregion
-
-        #region Whitespace-padded input tests
-
-        [Theory]
-        [MemberData(nameof(DurationTimeParserValidTestData.ValidWhitespacePaddedInputs),
-            MemberType = typeof(DurationTimeParserValidTestData))]
-        public void TryParse_WhitespacePaddedInput_ReturnsTrueAndCorrectTimeSpan(string input, string result)
-        {
-            // Arrange
-            _ = TimeSpan.TryParse(result, out var expectedResult);
-
-            // Act
-            var parsedResult = DurationTimeParser.TryParse(input, out var parsedValue);
-
-            // Assert
-            parsedValue.Should().Be(expectedResult);
-            parsedResult.Should().BeTrue();
-        }
-
-        #endregion
-
-        #region Standalone fractional unit tests
-
-        [Theory]
-        [MemberData(nameof(DurationTimeParserValidTestData.ValidStandaloneFractionalUnitInputs),
-            MemberType = typeof(DurationTimeParserValidTestData))]
-        public void TryParse_StandaloneFractionalUnit_ReturnsTrueAndCorrectTimeSpan(string input, string result)
-        {
-            // Arrange
-            _ = TimeSpan.TryParse(result, out var expectedResult);
-
-            // Act
-            var parsedResult = DurationTimeParser.TryParse(input, out var parsedValue);
-
-            // Assert
-            parsedValue.Should().Be(expectedResult);
-            parsedResult.Should().BeTrue();
-        }
-
-        #endregion
-
         #region Negative unrolling tests
 
         [Theory]
@@ -530,7 +551,8 @@ public static partial class DurationTimeParserTests
         [Theory]
         [MemberData(nameof(DurationTimeParserRollingOverTestData.ValidNegativeRollingOver1001MillisecondsInputs),
             MemberType = typeof(DurationTimeParserRollingOverTestData))]
-        public void TryParse_NegativeRollingOverThousandAndOneMilliseconds_ReturnsTrueAndNegativeOneSecondAndOneMillisecond(string input)
+        public void TryParse_NegativeRollingOverThousandAndOneMilliseconds_ReturnsTrueAndNegativeOneSecondAndOneMillisecond(
+            string input)
         {
             // Arrange
             // Act
@@ -572,7 +594,8 @@ public static partial class DurationTimeParserTests
         [Theory]
         [MemberData(nameof(DurationTimeParserRollingOverTestData.ValidNegativeRollingOverWithNonZeroHigherComponentInputs),
             MemberType = typeof(DurationTimeParserRollingOverTestData))]
-        public void TryParse_NegativeRollingOverWithNonZeroHigherComponents_ReturnsTrueAndCorrectTimeSpan(string input, string result)
+        public void TryParse_NegativeRollingOverWithNonZeroHigherComponents_ReturnsTrueAndCorrectTimeSpan(string input,
+            string result)
         {
             // Arrange
             _ = TimeSpan.TryParse(result, out var expectedResult);
@@ -598,27 +621,6 @@ public static partial class DurationTimeParserTests
 
             // Assert
             parsedValue.Should().Be(expectedResult);
-            parsedResult.Should().BeTrue();
-        }
-
-        #endregion
-
-        #region Boundary value tests
-
-        [Theory]
-        [MemberData(nameof(DurationTimeParserValidTestData.ValidBoundaryInputs),
-            MemberType = typeof(DurationTimeParserValidTestData))]
-        public void TryParse_BoundaryValues_ReturnsTrueAndCorrectTimeSpan(string input, int days, int hours, int minutes,
-            int seconds, int milliseconds)
-        {
-            // Arrange
-            var expected = new TimeSpan(days, hours, minutes, seconds, milliseconds);
-
-            // Act
-            var parsedResult = DurationTimeParser.TryParse(input, out var parsedValue);
-
-            // Assert
-            parsedValue.Should().Be(expected);
             parsedResult.Should().BeTrue();
         }
 
