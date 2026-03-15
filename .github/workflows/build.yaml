@@ -42,7 +42,15 @@ jobs:
         arguments: '/output buildserver /l console /config GitVersion.yaml /updateprojectfiles' # have to self-define all arguments; /updateprojectfiles not impl. in execute task
 
     # --- Tool setup ---
-    - name: Setup .NET
+    - name: Setup .NET 8
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+    - name: Setup .NET 9
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 9.0.x
+    - name: Setup .NET 10
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 10.0.x
