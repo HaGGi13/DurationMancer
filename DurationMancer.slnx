@@ -1,4 +1,12 @@
 <Solution>
+  <Folder Name="/Solution/">
+    <File Path=".editorconfig" />
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="LICENSE" />
+    <File Path="README.md" />
+  </Folder>
   <Project Path="benchmarks/DurationMancer.Benchmarks/DurationMancer.Benchmarks.csproj" />
   <Project Path="src/DurationMancer/DurationMancer.csproj" />
   <Project Path="tests/DurationMancer.Tests/DurationMancer.Tests.csproj" />
